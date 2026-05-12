@@ -7,6 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CardScan">
 <title>CardScan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -37,9 +38,10 @@
     font-family: 'DM Sans', sans-serif;
     font-weight: 400;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Desktop block screen */
+  /* Desktop block */
   #desktop-block {
     display: none;
     position: fixed; inset: 0;
@@ -51,10 +53,9 @@
     text-align: center;
     padding: 2rem;
   }
-  #desktop-block svg { width: 64px; height: 64px; margin-bottom: 1.5rem; opacity: 0.4; }
+  #desktop-block svg { width: 64px; height: 64px; margin-bottom: 1.5rem; opacity: 0.35; }
   #desktop-block h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; color: #f0ede8; margin-bottom: 0.75rem; }
-  #desktop-block p { color: #8a867f; font-size: 1rem; line-height: 1.6; max-width: 320px; }
-
+  #desktop-block p { color: #8a867f; font-size: 1rem; line-height: 1.6; max-width: 300px; }
   @media (min-width: 768px) {
     #desktop-block { display: flex; }
     #app { display: none; }
@@ -65,15 +66,16 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* Header */
   header {
     padding: 1.25rem 1.5rem 0.75rem;
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
   }
   .logo-mark {
     width: 32px; height: 32px;
@@ -82,28 +84,22 @@
     display: flex; align-items: center; justify-content: center;
   }
   .logo-mark svg { width: 18px; height: 18px; }
-  header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.3rem;
-    color: var(--text);
-    letter-spacing: -0.01em;
-  }
-  header span {
-    margin-left: auto;
-    font-size: 12px;
-    color: var(--text3);
-    font-weight: 300;
-  }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--text); letter-spacing: -0.01em; }
+  .badge { margin-left: auto; font-size: 11px; color: var(--text3); font-weight: 300; }
 
-  /* Main content area */
-  main { flex: 1; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+  main { flex: 1; padding: 1rem 1.25rem; overflow-y: auto; }
 
-  /* Screen: home */
-  .screen { display: none; flex-direction: column; gap: 1rem; animation: fadeUp 0.25s ease; }
+  .screen { display: none; flex-direction: column; gap: 1rem; animation: fadeUp 0.22s ease; padding-bottom: 2rem; }
   .screen.active { display: flex; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-  /* Viewfinder / camera zone */
+  .label {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text3); padding: 0 2px;
+  }
+
+  /* Viewfinder */
   .viewfinder {
     border-radius: var(--radius);
     background: var(--surface);
@@ -112,212 +108,154 @@
     position: relative;
     aspect-ratio: 85.6 / 54;
   }
-  .viewfinder video, .viewfinder img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .viewfinder-overlay {
+  .viewfinder img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vf-overlay {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 12px;
-    background: rgba(0,0,0,0.4);
-    cursor: pointer;
+    gap: 12px; background: rgba(0,0,0,0.38); cursor: pointer;
   }
-  .viewfinder-overlay svg { width: 48px; height: 48px; color: var(--accent); }
-  .viewfinder-overlay p { font-size: 13px; color: rgba(255,255,255,0.7); text-align: center; padding: 0 1rem; }
-  .corner-tl, .corner-tr, .corner-bl, .corner-br {
-    position: absolute; width: 22px; height: 22px;
-    border-color: var(--accent); border-style: solid; opacity: 0.7;
-  }
-  .corner-tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
-  .corner-tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
-  .corner-bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
-  .corner-br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+  .vf-overlay svg { width: 46px; height: 46px; color: var(--accent); }
+  .vf-overlay p { font-size: 13px; color: rgba(255,255,255,0.65); text-align: center; padding: 0 1rem; }
+  .corner { position: absolute; width: 22px; height: 22px; border-color: var(--accent); border-style: solid; opacity: 0.65; }
+  .corner.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+  .corner.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+  .corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+  .corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
 
   /* Buttons */
   .btn {
-    width: 100%;
-    padding: 15px 20px;
+    width: 100%; padding: 15px 20px;
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--border2);
-    background: var(--surface);
-    color: var(--text);
+    background: var(--surface); color: var(--text);
     font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
+    font-size: 15px; font-weight: 400;
     display: flex; align-items: center; justify-content: center; gap: 10px;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+    transition: background 0.12s, transform 0.08s;
     -webkit-user-select: none; user-select: none;
     touch-action: manipulation;
   }
   .btn:active { transform: scale(0.97); background: var(--surface2); }
-  .btn.btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0a0a0a;
-    font-weight: 500;
-  }
-  .btn.btn-primary:active { background: var(--accent2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #0a0a0a; font-weight: 500; }
+  .btn.primary:active { background: var(--accent2); }
+  .btn.success-btn { background: var(--success); border-color: var(--success); color: #0a0a0a; font-weight: 500; }
+  .btn.success-btn:active { background: #3d8f65; }
   .btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-  .btn-row { display: flex; gap: 10px; }
-  .btn-row .btn { flex: 1; }
-
-  /* Section label */
-  .label {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text3);
-    padding: 0 2px;
-  }
 
   /* Loading */
-  #screen-loading {
-    align-items: center;
-    justify-content: center;
-    min-height: 50vh;
-    gap: 1.5rem;
-  }
+  #screen-loading { align-items: center; justify-content: center; min-height: 55vh; gap: 1rem; }
   .pulse-ring {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    border: 2px solid var(--accent);
-    position: relative;
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 2px solid var(--accent); position: relative;
     animation: pulse-ring 1.4s ease infinite;
   }
   .pulse-ring::after {
-    content: '';
-    position: absolute;
-    inset: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    opacity: 0.3;
-    animation: pulse-dot 1.4s ease infinite;
+    content: ''; position: absolute; inset: 8px;
+    border-radius: 50%; background: var(--accent);
+    opacity: 0.3; animation: pulse-dot 1.4s ease infinite;
   }
   @keyframes pulse-ring { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:0.6} }
   @keyframes pulse-dot { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
-  #screen-loading p { font-size: 15px; color: var(--text2); }
+  .progress-wrap { width: 200px; }
+  .progress-bar { width: 100%; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s ease; }
+  .progress-label { font-size: 13px; color: var(--text3); margin-top: 8px; text-align: center; }
 
-  /* Result card */
-  .contact-card {
+  /* Form */
+  .form-card {
     background: var(--surface);
     border: 0.5px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
   }
-  .contact-hero {
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #1a1610 0%, #141414 100%);
-    border-bottom: 0.5px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .avatar {
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    background: var(--accent);
-    color: #0a0a0a;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'DM Serif Display', serif;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-  .contact-hero-text h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.2rem;
-    color: var(--text);
-    line-height: 1.2;
-  }
-  .contact-hero-text p {
-    font-size: 13px;
-    color: var(--text2);
-    margin-top: 3px;
-  }
-  .contact-fields { padding: 0.25rem 0; }
-  .field {
-    display: flex;
-    align-items: center;
-    padding: 0.9rem 1.25rem;
-    gap: 1rem;
-    border-bottom: 0.5px solid var(--border);
-    position: relative;
-  }
-  .field:last-child { border-bottom: none; }
-  .field-icon {
-    width: 36px; height: 36px;
-    border-radius: 9px;
-    background: var(--surface2);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .field-icon svg { width: 18px; height: 18px; color: var(--accent); }
-  .field-info { flex: 1; min-width: 0; }
-  .field-info small { font-size: 11px; color: var(--text3); display: block; text-transform: uppercase; letter-spacing: 0.06em; }
-  .field-info span { font-size: 14px; color: var(--text); display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .field-info span.empty { color: var(--text3); font-style: italic; }
-  .field-copy {
-    background: none; border: none;
-    color: var(--text3);
-    padding: 6px;
-    cursor: pointer;
-    border-radius: 6px;
+  .form-row {
     display: flex; align-items: center;
-    transition: color 0.15s;
+    padding: 0 1.25rem;
+    border-bottom: 0.5px solid var(--border);
+    min-height: 52px;
+  }
+  .form-row:last-child { border-bottom: none; }
+  .form-row label {
+    flex: 0 0 88px;
+    font-size: 12px; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
+  }
+  .form-row input, .form-row textarea {
+    flex: 1; border: none; outline: none;
+    background: transparent;
+    font-size: 15px; color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    padding: 14px 0; width: 100%;
+    caret-color: var(--accent);
+  }
+  .form-row textarea { resize: none; min-height: 52px; padding-top: 14px; line-height: 1.5; }
+  .form-row input::placeholder, .form-row textarea::placeholder { color: var(--text3); }
+
+  /* Raw OCR toggle */
+  .raw-toggle {
+    background: none; border: none;
+    color: var(--text3); font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; padding: 0 2px;
+    display: flex; align-items: center; gap: 6px;
     touch-action: manipulation;
   }
-  .field-copy:active { color: var(--accent); }
-  .field-copy svg { width: 17px; height: 17px; }
-  .field-copy.done { color: var(--success); }
+  .raw-toggle svg { width: 14px; height: 14px; transition: transform 0.15s; }
+  .raw-toggle.open svg { transform: rotate(90deg); }
+  .raw-box {
+    display: none;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 12px; color: var(--text3);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: pre-wrap; line-height: 1.5;
+    max-height: 160px; overflow-y: auto;
+  }
+  .raw-box.open { display: block; }
 
   /* Error */
-  #screen-error {
-    align-items: center;
-    justify-content: center;
-    min-height: 50vh;
-    gap: 1rem;
-    text-align: center;
-  }
-  .err-icon {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    background: rgba(201,79,79,0.12);
-    display: flex; align-items: center; justify-content: center;
-  }
+  #screen-error { align-items: center; justify-content: center; min-height: 55vh; gap: 1rem; text-align: center; }
+  .err-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(201,79,79,0.12); display: flex; align-items: center; justify-content: center; }
   .err-icon svg { width: 30px; height: 30px; color: var(--danger); }
   #screen-error h3 { font-family: 'DM Serif Display', serif; font-size: 1.2rem; }
-  #screen-error p { font-size: 14px; color: var(--text2); max-width: 260px; line-height: 1.6; }
+  #screen-error p { font-size: 14px; color: var(--text2); max-width: 250px; line-height: 1.6; }
 
-  /* Bottom bar */
+  /* Toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px;
+    transform: translateX(-50%) translateY(140%);
+    background: rgba(240,237,232,0.95); color: #0a0a0a;
+    padding: 11px 20px; border-radius: 10px;
+    font-size: 14px; font-weight: 500;
+    transition: transform 0.22s ease;
+    z-index: 50; max-width: 84%; text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
   footer {
     padding: 0.75rem 1.25rem;
     padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
-    font-size: 11px;
-    color: var(--text3);
+    font-size: 11px; color: var(--text3);
     text-align: center;
     border-top: 0.5px solid var(--border);
+    flex-shrink: 0;
   }
-
-  canvas { display: none; }
 </style>
 </head>
 <body>
 
-<!-- Desktop block -->
 <div id="desktop-block">
   <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
   <h1>Mobile only</h1>
-  <p>CardScan is designed for your phone. Open this page on your mobile browser to scan business cards.</p>
+  <p>CardScan is designed for your phone. Open this on your mobile browser to scan business cards.</p>
 </div>
 
-<!-- App -->
 <div id="app">
-  <canvas id="canvas"></canvas>
-  <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none">
+  <input type="file" id="file-input" accept="image/*" style="display:none">
 
   <header>
     <div class="logo-mark">
@@ -328,30 +266,26 @@
       </svg>
     </div>
     <h1>CardScan</h1>
-    <span>AI-powered</span>
+    <span class="badge">100% offline</span>
   </header>
 
   <main>
 
     <!-- HOME -->
     <div class="screen active" id="screen-home">
-      <div class="viewfinder" id="viewfinder" onclick="openCamera()">
-        <div class="viewfinder-overlay">
+      <div class="viewfinder" onclick="openCamera()">
+        <div class="vf-overlay">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
             <circle cx="12" cy="13" r="4"/>
           </svg>
           <p>Tap to photograph a business card</p>
         </div>
-        <div class="corner-tl"></div>
-        <div class="corner-tr"></div>
-        <div class="corner-bl"></div>
-        <div class="corner-br"></div>
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
       </div>
-
-      <p class="label">or choose from your photos</p>
-
-      <button class="btn" onclick="document.getElementById('file-input').click()">
+      <p class="label">or choose from library</p>
+      <button class="btn" onclick="openLibrary()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
           <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -366,16 +300,14 @@
       <p class="label">Review your photo</p>
       <div class="viewfinder">
         <img id="preview-img" src="" alt="Card preview">
-        <div class="corner-tl"></div>
-        <div class="corner-tr"></div>
-        <div class="corner-bl"></div>
-        <div class="corner-br"></div>
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
       </div>
-      <button class="btn btn-primary" onclick="scanCard()">
+      <button class="btn primary" id="scan-btn" onclick="scanCard()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
         </svg>
-        Extract contact info
+        Scan card
       </button>
       <button class="btn" onclick="showScreen('screen-home')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -388,23 +320,28 @@
     <!-- LOADING -->
     <div class="screen" id="screen-loading">
       <div class="pulse-ring"></div>
-      <p>Reading the card…</p>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label" id="progress-label">Loading OCR engine…</div>
+      </div>
     </div>
 
-    <!-- RESULT -->
-    <div class="screen" id="screen-result">
-      <p class="label">Contact found</p>
-      <div class="contact-card">
-        <div class="contact-hero">
-          <div class="avatar" id="result-avatar">?</div>
-          <div class="contact-hero-text">
-            <h2 id="result-name">—</h2>
-            <p id="result-title"></p>
-          </div>
-        </div>
-        <div class="contact-fields" id="result-fields"></div>
+    <!-- RESULTS -->
+    <div class="screen" id="screen-results">
+      <p class="label">Review &amp; edit</p>
+      <div class="form-card">
+        <div class="form-row"><label>First</label><input type="text" id="f-first" placeholder="First name" autocomplete="off" autocorrect="off"></div>
+        <div class="form-row"><label>Last</label><input type="text" id="f-last" placeholder="Last name" autocomplete="off" autocorrect="off"></div>
+        <div class="form-row"><label>Title</label><input type="text" id="f-title" placeholder="Job title" autocomplete="off" autocorrect="off"></div>
+        <div class="form-row"><label>Company</label><input type="text" id="f-company" placeholder="Company" autocomplete="off" autocorrect="off"></div>
+        <div class="form-row"><label>Mobile</label><input type="tel" id="f-mobile" placeholder="Mobile phone" autocomplete="off"></div>
+        <div class="form-row"><label>Work</label><input type="tel" id="f-work" placeholder="Work phone" autocomplete="off"></div>
+        <div class="form-row"><label>Email</label><input type="email" id="f-email" placeholder="Email address" autocomplete="off" autocorrect="off" autocapitalize="none"></div>
+        <div class="form-row"><label>Website</label><input type="url" id="f-website" placeholder="Website" autocomplete="off" autocorrect="off" autocapitalize="none"></div>
+        <div class="form-row"><label>Address</label><textarea id="f-address" placeholder="Street address" rows="2"></textarea></div>
+        <div class="form-row"><label>Notes</label><textarea id="f-notes" placeholder="Other info" rows="2"></textarea></div>
       </div>
-      <button class="btn btn-primary" onclick="saveVCard()">
+      <button class="btn success-btn" onclick="saveVCard()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
           <circle cx="9" cy="7" r="4"/>
@@ -419,6 +356,11 @@
         </svg>
         Scan another
       </button>
+      <button class="raw-toggle" id="raw-toggle" onclick="toggleRaw()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        Show raw OCR text
+      </button>
+      <div class="raw-box" id="raw-box"></div>
     </div>
 
     <!-- ERROR -->
@@ -429,29 +371,41 @@
         </svg>
       </div>
       <h3>Couldn't read the card</h3>
-      <p>Make sure the card is well-lit and flat, with text fully in frame.</p>
-      <button class="btn btn-primary" style="width:auto;padding:13px 28px;" onclick="showScreen('screen-home')">Try again</button>
+      <p>Try a clearer, well-lit photo with the card filling the frame.</p>
+      <button class="btn primary" style="width:auto;padding:13px 28px;" onclick="showScreen('screen-home')">Try again</button>
     </div>
 
   </main>
 
-  <footer>Images are sent to AI only for extraction · Not stored</footer>
+  <footer>Runs entirely in your browser · No data leaves your phone</footer>
+  <div class="toast" id="toast"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <script>
+(() => {
   let capturedDataURL = null;
-  let lastContact = null;
 
+  // ── Screen management ──────────────────────────────────────
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }
 
   function openCamera() {
-    const input = document.getElementById('file-input');
-    input.setAttribute('capture', 'environment');
-    input.click();
+    const inp = document.getElementById('file-input');
+    inp.setAttribute('capture', 'environment');
+    inp.click();
   }
+  function openLibrary() {
+    const inp = document.getElementById('file-input');
+    inp.removeAttribute('capture');
+    inp.click();
+  }
+  window.openCamera = openCamera;
+  window.openLibrary = openLibrary;
+  window.showScreen = showScreen;
 
   document.getElementById('file-input').addEventListener('change', function() {
     const file = this.files[0];
@@ -466,132 +420,326 @@
     this.value = '';
   });
 
-  async function scanCard() {
-    if (!capturedDataURL) return;
-    showScreen('screen-loading');
-
-    const base64 = capturedDataURL.split(',')[1];
-    const mediaType = capturedDataURL.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-              { type: 'text', text: 'This is a business card image. Extract contact information and respond ONLY with a JSON object — no markdown, no explanation, no backticks. Use exactly these keys: name (full name or empty string), title (job title or empty string), company (company name or empty string), email (email address or empty string), phone (phone number or empty string), website (website URL or empty string). If a field is not visible or unclear, use empty string.' }
-            ]
-          }]
-        })
-      });
-
-      const data = await res.json();
-      const text = data.content?.map(c => c.text || '').join('') || '';
-      const clean = text.replace(/```json|```/g, '').trim();
-      const contact = JSON.parse(clean);
-      lastContact = contact;
-      renderResult(contact);
-      showScreen('screen-result');
-    } catch(e) {
-      showScreen('screen-error');
-    }
-  }
-
-  function initials(name) {
-    if (!name) return '?';
-    return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
-  }
-
-  function renderResult(c) {
-    document.getElementById('result-avatar').textContent = initials(c.name);
-    document.getElementById('result-name').textContent = c.name || 'Unknown';
-    document.getElementById('result-title').textContent = [c.title, c.company].filter(Boolean).join(' · ');
-
-    const fields = [
-      { key: 'email', label: 'Email', href: c.email ? 'mailto:' + c.email : null, icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>` },
-      { key: 'phone', label: 'Phone', href: c.phone ? 'tel:' + c.phone : null, icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.64 3.42 2 2 0 0 1 3.61 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>` },
-      { key: 'website', label: 'Website', href: c.website ? (c.website.startsWith('http') ? c.website : 'https://' + c.website) : null, icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>` },
-    ];
-
-    const container = document.getElementById('result-fields');
-    container.innerHTML = fields.map(f => {
-      const val = c[f.key];
-      const display = val
-        ? (f.href ? `<a href="${f.href}" style="color:var(--accent);text-decoration:none;">${val}</a>` : val)
-        : `<span class="empty">Not found</span>`;
-      const copyBtn = val
-        ? `<button class="field-copy" onclick="copyField(this,'${val.replace(/'/g,"\\'")}')" aria-label="Copy ${f.label}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-           </button>`
-        : '';
-      return `<div class="field">
-        <div class="field-icon">${f.icon}</div>
-        <div class="field-info">
-          <small>${f.label}</small>
-          <span>${display}</span>
-        </div>
-        ${copyBtn}
-      </div>`;
-    }).join('');
-  }
-
-  function copyField(btn, val) {
-    navigator.clipboard.writeText(val).then(() => {
-      btn.classList.add('done');
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-      setTimeout(() => {
-        btn.classList.remove('done');
-        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
-      }, 1500);
+  // ── Image preprocessing ────────────────────────────────────
+  // Upscale + grayscale only (no contrast stretch — it amplifies noise)
+  function preprocessImage(dataUrl) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 2000;
+        let { width: w, height: h } = img;
+        const scale = Math.min(MAX / Math.max(w, h), 2.5);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+          const id = ctx.getImageData(0, 0, w, h);
+          const d = id.data;
+          // Grayscale only — skip contrast stretch to avoid amplifying background noise
+          for (let i = 0; i < d.length; i += 4) {
+            const g = (d[i] * 0.299 + d[i+1] * 0.587 + d[i+2] * 0.114) | 0;
+            d[i] = d[i+1] = d[i+2] = g;
+          }
+          ctx.putImageData(id, 0, 0);
+        } catch(e) { /* tainted canvas fallback */ }
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
     });
   }
 
-  function saveVCard() {
-    if (!lastContact) return;
-    const c = lastContact;
+  // ── OCR + noise filter ─────────────────────────────────────
+  async function scanCard() {
+    if (!capturedDataURL) return;
+    showScreen('screen-loading');
+    const fill = document.getElementById('progress-fill');
+    const lbl  = document.getElementById('progress-label');
+    fill.style.width = '0%';
+    lbl.textContent = 'Preparing image…';
 
-    // Split name into first/last for vCard N field
-    const nameParts = (c.name || '').trim().split(/\s+/);
-    const lastName = nameParts.length > 1 ? nameParts.pop() : '';
-    const firstName = nameParts.join(' ');
+    try {
+      const processed = await preprocessImage(capturedDataURL);
+      lbl.textContent = 'Loading OCR engine…';
 
-    // Escape special vCard characters
-    const esc = s => (s || '').replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
+      const result = await Tesseract.recognize(processed, 'eng', {
+        logger: m => {
+          if (m.status) lbl.textContent = m.status.charAt(0).toUpperCase() + m.status.slice(1) + '…';
+          if (typeof m.progress === 'number') fill.style.width = Math.round(m.progress * 100) + '%';
+        }
+      });
 
-    const lines = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      `N:${esc(lastName)};${esc(firstName)};;;`,
-      `FN:${esc(c.name)}`,
-    ];
-    if (c.title)   lines.push(`TITLE:${esc(c.title)}`);
-    if (c.company) lines.push(`ORG:${esc(c.company)}`);
-    if (c.email)   lines.push(`EMAIL;TYPE=WORK,INTERNET:${esc(c.email)}`);
-    if (c.phone)   lines.push(`TEL;TYPE=WORK,VOICE:${esc(c.phone)}`);
+      const rawText = (result && result.data && result.data.text) || '';
+      const cleanText = filterNoise(rawText);
+      const parsed = parseCardText(cleanText);
+      fillForm(parsed, rawText);
+      showScreen('screen-results');
+    } catch(err) {
+      console.error(err);
+      showScreen('screen-error');
+    }
+  }
+  window.scanCard = scanCard;
+
+  // ── Noise filter ───────────────────────────────────────────
+  // The core fix: score each line and discard lines that look like OCR garbage
+  // (too many non-letter chars, too few real dictionary-like tokens, etc.)
+  function filterNoise(rawText) {
+    const EMAIL_RE  = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;
+    const PHONE_RE  = /(?:\+?\d[\s.\-]?)?(?:\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}/;
+    const URL_RE    = /\b(?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9\-]+\.(?:com|net|org|io|co|us|edu|gov|biz|info|app|dev|me|ai|tech|design)\b/i;
+    const ADDR_RE   = /\b\d{1,5}\s+\w|\bsuite\b|\bfl\s*\d|\bave\b|\bblvd\b|\bst\b|\brd\b|\bdr\b|\bln\b|\bway\b|\bfl\b|\bzip\b/i;
+    const STATE_ZIP = /\b[A-Z]{2}\s+\d{5}\b/;
+
+    return rawText
+      .split(/\r?\n/)
+      .map(l => l.replace(/\s+/g, ' ').trim())
+      .filter(line => {
+        if (line.length < 2) return false;
+
+        // Always keep lines with known-good patterns regardless of noise
+        if (EMAIL_RE.test(line)) return true;
+        if (PHONE_RE.test(line)) return true;
+        if (URL_RE.test(line))   return true;
+        if (ADDR_RE.test(line))  return true;
+        if (STATE_ZIP.test(line)) return true;
+
+        // Score the line: what fraction of characters are "real" (letters, spaces, common punctuation)?
+        const goodChars = (line.match(/[a-zA-Z0-9\s@.,\-'&()]/g) || []).length;
+        const ratio = goodChars / line.length;
+        if (ratio < 0.65) return false;  // More than 35% garbage chars → discard
+
+        // Require that the line has at least one "word" of 2+ real letters
+        const hasWord = /[a-zA-Z]{2,}/.test(line);
+        if (!hasWord) return false;
+
+        // Discard lines that are mostly uppercase single-character clusters (logo/design noise)
+        // e.g. "A ro Se me SO DUR RAS RAN" — lots of 2-3 char caps tokens
+        const tokens = line.split(/\s+/).filter(Boolean);
+        const shortCapsTokens = tokens.filter(t => /^[A-Z]{1,3}$/.test(t)).length;
+        const shortCapsRatio = shortCapsTokens / tokens.length;
+        if (tokens.length >= 4 && shortCapsRatio > 0.55) return false;
+
+        // Discard lines where average token length is very short (noise tends to fragment)
+        const avgLen = tokens.reduce((s, t) => s + t.length, 0) / tokens.length;
+        if (tokens.length >= 5 && avgLen < 2.5) return false;
+
+        return true;
+      })
+      .join('\n');
+  }
+
+  // ── Parser (kept from team lead, unchanged) ────────────────
+  const EMAIL_RE   = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+  const URL_RE     = /\b((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9][a-zA-Z0-9\-]*\.(?:com|net|org|io|co|us|edu|gov|biz|info|app|dev|me|tv|ai|tech|design|store|shop)(?:\/[^\s]*)?)\b/gi;
+  const PHONE_RE   = /(?:\+?\d{1,3}[\s.\-]?)?(?:\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}/g;
+  const ZIP_RE     = /\b\d{5}(?:-\d{4})?\b/;
+  const STATE_RE   = /\b(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/;
+  const STREET_RE  = /\b(?:Street|St\.?|Road|Rd\.?|Avenue|Ave\.?|Boulevard|Blvd\.?|Drive|Dr\.?|Lane|Ln\.?|Way|Court|Ct\.?|Suite|Ste\.?|Floor|Fl\.?|Highway|Hwy\.?|Parkway|Pkwy\.?|Circle|Cir\.?)\b/i;
+  const TITLE_RE   = /\b(CEO|CTO|CFO|COO|CIO|CMO|President|Vice\s+President|VP|EVP|SVP|Director|Manager|Engineer|Developer|Designer|Architect|Specialist|Coordinator|Analyst|Consultant|Owner|Founder|Co[\-\s]?Founder|Partner|Principal|Associate|Senior|Junior|Lead|Head|Chief|Officer|Administrator|Supervisor|Producer|Editor|Writer|Marketing|Sales|Account|Recruiter|Realtor|Agent|Broker|Attorney|Lawyer|Counsel|Accountant|Advisor|Strategist|Representative|Rep|Technician|MIXED[\-\s]?USE|WORKPLACE)\b/i;
+  const COMPANY_RE = /\b(LLC|L\.L\.C\.?|Inc\.?|Incorporated|Corp\.?|Corporation|Limited|Ltd\.?|Co\.?|Company|Group|Services|Solutions|Technologies|Systems|Associates|Partners|Enterprises|Holdings|Studios|Agency|Media|Consulting|Realty|Properties|Capital|Ventures|Industries|International)\b/i;
+  const PHONE_LABEL = /(?:mobile|cell|cellular|mob\b|c\b|m\b|direct|office|work|tel|phone|main|fax|f\b|t\b|p\b|o\b|toll[\s\-]?free|home|h\b)\s*[:.(\-]?/i;
+  const FAX_LABEL   = /\bfax\b|\bf:\s/i;
+
+  function parseCardText(text) {
+    const lines = text.split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).filter(l => l.length > 1);
+    const out = { firstName:'', lastName:'', company:'', title:'', mobile:'', workPhone:'', email:'', website:'', address:'', notes:'' };
+    const used = new Set();
+
+    // Email
+    lines.forEach((line, i) => {
+      const m = line.match(EMAIL_RE);
+      if (m) {
+        if (!out.email) out.email = m[0].toLowerCase();
+        if (line.replace(EMAIL_RE, '').replace(/[\s:.,\-]/g, '').length < 3) used.add(i);
+      }
+    });
+
+    // Website
+    lines.forEach((line, i) => {
+      if (used.has(i)) return;
+      const cleaned = line.replace(EMAIL_RE, '');
+      const m = cleaned.match(URL_RE);
+      if (m && !out.website) {
+        out.website = m[0].replace(/[),.;]+$/, '');
+        if (cleaned.replace(URL_RE, '').replace(/[\s:.,\-]/g, '').length < 3) used.add(i);
+      }
+    });
+
+    // Phones
+    const phoneHits = [];
+    lines.forEach((line, i) => {
+      const matches = line.match(PHONE_RE) || [];
+      matches.forEach(num => {
+        const ctx = line.toLowerCase();
+        const isFax    = FAX_LABEL.test(ctx);
+        const isMobile = /\b(mobile|cell|cellular|mob|m|c)\b\s*[:.(\-]?/.test(ctx) || /\bcell\b|\bmobile\b/.test(ctx);
+        const isWork   = /\b(office|work|direct|tel|phone|main|t|p|o|w)\b\s*[:.(\-]?/.test(ctx) && !isMobile;
+        phoneHits.push({ num: prettifyPhone(num), isFax, isMobile, isWork, lineIdx: i });
+      });
+      if (matches.length && line.replace(PHONE_RE, '').replace(PHONE_LABEL, '').replace(/[\s:.,\-()]/g, '').length < 3) used.add(i);
+    });
+    const mobileHit = phoneHits.find(p => p.isMobile && !p.isFax);
+    if (mobileHit) out.mobile = mobileHit.num;
+    const workHit = phoneHits.find(p => p.isWork && !p.isFax && p.num !== out.mobile);
+    if (workHit) out.workPhone = workHit.num;
+    if (!out.mobile) { const a = phoneHits.find(p => !p.isFax && p.num !== out.workPhone); if (a) out.mobile = a.num; }
+    if (!out.workPhone) { const a = phoneHits.find(p => !p.isFax && p.num !== out.mobile); if (a) out.workPhone = a.num; }
+
+    // Title & Company
+    for (let i = 0; i < lines.length; i++) {
+      if (used.has(i)) continue;
+      const line = lines[i];
+      if (COMPANY_RE.test(line) && !out.company) { out.company = cleanLine(line); used.add(i); continue; }
+      if (TITLE_RE.test(line) && !out.title && !COMPANY_RE.test(line)) { out.title = cleanLine(line); used.add(i); }
+    }
+
+    // Name
+    const HON_RE = /^(Dr|Mr|Mrs|Ms|Miss|Mx|Prof|Professor|Sir|Madam|Rev|Hon)\.?$/i;
+    for (let i = 0; i < lines.length; i++) {
+      if (used.has(i)) continue;
+      const line = lines[i];
+      if (PHONE_RE.test(line) || EMAIL_RE.test(line) || URL_RE.test(line)) continue;
+      if (COMPANY_RE.test(line) || TITLE_RE.test(line)) continue;
+      if (/\d/.test(line)) continue;
+      const cleaned = line.replace(/[^a-zA-Z\s.\-']/g, '').trim();
+      let parts = cleaned.split(/\s+/).filter(Boolean);
+      if (parts.length > 1 && HON_RE.test(parts[0])) parts = parts.slice(1);
+      if (parts.length >= 2 && parts.length <= 4 && parts.join(' ').length >= 4 && parts.join(' ').length <= 50) {
+        if (/^[A-Z]/.test(parts[0]) && /^[A-Z]/.test(parts[1])) {
+          out.firstName = parts[0];
+          out.lastName  = parts.slice(1).join(' ');
+          used.add(i);
+          break;
+        }
+      }
+    }
+
+    // Address
+    const addrLines = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (used.has(i)) continue;
+      const line = lines[i];
+      if (PHONE_RE.test(line) || EMAIL_RE.test(line) || URL_RE.test(line)) continue;
+      if (STREET_RE.test(line) || ZIP_RE.test(line) || (STATE_RE.test(line) && /\d/.test(line))) {
+        addrLines.push(line); used.add(i);
+      }
+    }
+    if (addrLines.length) out.address = addrLines.join(', ');
+
+    // Leftovers → notes or company fallback
+    const leftovers = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (used.has(i)) continue;
+      const line = lines[i];
+      if (PHONE_RE.test(line) && line.replace(PHONE_RE, '').replace(/[\s:.,\-()]/g, '').length < 3) continue;
+      leftovers.push({ line, idx: i });
+    }
+    if (!out.company) {
+      const candidate = leftovers.find(o => o.line.length <= 60 && !/[@/]/.test(o.line));
+      if (candidate) { out.company = cleanLine(candidate.line); leftovers.splice(leftovers.indexOf(candidate), 1); }
+    }
+    if (leftovers.length) out.notes = leftovers.map(o => o.line).join('\n');
+
+    return out;
+  }
+
+  function prettifyPhone(num) {
+    const d = num.replace(/\D/g, '');
+    if (d.length === 10) return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+    if (d.length === 11 && d[0] === '1') return `+1 (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
+    return num.trim();
+  }
+  function cleanLine(s) { return s.replace(/^[\s\W_]+|[\s\W_]+$/g, ''); }
+
+  // ── Form ───────────────────────────────────────────────────
+  function fillForm(p, rawText) {
+    document.getElementById('f-first').value   = p.firstName || '';
+    document.getElementById('f-last').value    = p.lastName  || '';
+    document.getElementById('f-title').value   = p.title     || '';
+    document.getElementById('f-company').value = p.company   || '';
+    document.getElementById('f-mobile').value  = p.mobile    || '';
+    document.getElementById('f-work').value    = p.workPhone || '';
+    document.getElementById('f-email').value   = p.email     || '';
+    document.getElementById('f-website').value = p.website   || '';
+    document.getElementById('f-address').value = p.address   || '';
+    document.getElementById('f-notes').value   = p.notes     || '';
+    document.getElementById('raw-box').textContent = rawText.trim() || '(empty)';
+  }
+
+  function getForm() {
+    return {
+      firstName: document.getElementById('f-first').value.trim(),
+      lastName:  document.getElementById('f-last').value.trim(),
+      title:     document.getElementById('f-title').value.trim(),
+      company:   document.getElementById('f-company').value.trim(),
+      mobile:    document.getElementById('f-mobile').value.trim(),
+      workPhone: document.getElementById('f-work').value.trim(),
+      email:     document.getElementById('f-email').value.trim(),
+      website:   document.getElementById('f-website').value.trim(),
+      address:   document.getElementById('f-address').value.trim(),
+      notes:     document.getElementById('f-notes').value.trim(),
+    };
+  }
+
+  // ── Raw OCR toggle ─────────────────────────────────────────
+  window.toggleRaw = function() {
+    const btn = document.getElementById('raw-toggle');
+    const box = document.getElementById('raw-box');
+    btn.classList.toggle('open');
+    box.classList.toggle('open');
+    btn.querySelector('span') && (btn.querySelector('span').textContent = box.classList.contains('open') ? 'Hide raw OCR text' : 'Show raw OCR text');
+  };
+  // Set initial text content on the button
+  document.getElementById('raw-toggle').innerHTML =
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg><span>Show raw OCR text</span>`;
+
+  // ── vCard ──────────────────────────────────────────────────
+  function esc(s) {
+    return (s||'').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\r?\n/g,'\\n');
+  }
+
+  window.saveVCard = function() {
+    const c = getForm();
+    if (!c.firstName && !c.lastName && !c.company) { showToast('Add at least a name or company first.'); return; }
+    const fn = [c.firstName, c.lastName].filter(Boolean).join(' ') || c.company;
+    const lines = ['BEGIN:VCARD','VERSION:3.0',`N:${esc(c.lastName)};${esc(c.firstName)};;;`,`FN:${esc(fn)}`];
+    if (c.company)   lines.push(`ORG:${esc(c.company)}`);
+    if (c.title)     lines.push(`TITLE:${esc(c.title)}`);
+    if (c.mobile)    lines.push(`TEL;TYPE=CELL,VOICE:${esc(c.mobile)}`);
+    if (c.workPhone) lines.push(`TEL;TYPE=WORK,VOICE:${esc(c.workPhone)}`);
+    if (c.email)     lines.push(`EMAIL;TYPE=INTERNET,WORK:${esc(c.email)}`);
     if (c.website) {
-      const url = c.website.startsWith('http') ? c.website : 'https://' + c.website;
+      const url = /^https?:\/\//i.test(c.website) ? c.website : 'https://' + c.website;
       lines.push(`URL:${esc(url)}`);
     }
-    lines.push('END:VCARD');
-
-    const vcf = lines.join('\r\n');
-    const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-
-    // Trigger download — iOS Safari will intercept .vcf and open Contacts
+    if (c.address)   lines.push(`ADR;TYPE=WORK:;;${esc(c.address)};;;;`);
+    if (c.notes)     lines.push(`NOTE:${esc(c.notes)}`);
+    lines.push(`REV:${new Date().toISOString()}`, 'END:VCARD');
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/vcard;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const safe = fn.replace(/[^a-zA-Z0-9_\-]/g, '_') || 'contact';
     const a = document.createElement('a');
-    a.href = url;
-    a.download = (c.name ? c.name.replace(/\s+/g, '_') : 'contact') + '.vcf';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    a.href = url; a.download = safe + '.vcf';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    showToast('Opening Contacts…');
+  };
+
+  // ── Toast ──────────────────────────────────────────────────
+  let _tt;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(_tt);
+    _tt = setTimeout(() => el.classList.remove('show'), 2600);
   }
+
+})();
 </script>
 </body>
 </html>
