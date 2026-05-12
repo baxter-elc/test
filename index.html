@@ -404,21 +404,21 @@
         </div>
         <div class="contact-fields" id="result-fields"></div>
       </div>
-      <div class="btn-row">
-        <button class="btn" onclick="showScreen('screen-home')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
-          </svg>
-          Scan another
-        </button>
-        <button class="btn btn-primary" onclick="copyAll()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-            <rect x="9" y="9" width="13" height="13" rx="2"/>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>
-          Copy all
-        </button>
-      </div>
+      <button class="btn btn-primary" onclick="saveVCard()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        Save to Contacts
+      </button>
+      <button class="btn" onclick="showScreen('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+        </svg>
+        Scan another
+      </button>
     </div>
 
     <!-- ERROR -->
@@ -551,10 +551,46 @@
     });
   }
 
-  function copyAll() {
+  function saveVCard() {
     if (!lastContact) return;
-    const parts = [lastContact.name, lastContact.title, lastContact.company, lastContact.email, lastContact.phone, lastContact.website].filter(Boolean);
-    navigator.clipboard.writeText(parts.join('\n'));
+    const c = lastContact;
+
+    // Split name into first/last for vCard N field
+    const nameParts = (c.name || '').trim().split(/\s+/);
+    const lastName = nameParts.length > 1 ? nameParts.pop() : '';
+    const firstName = nameParts.join(' ');
+
+    // Escape special vCard characters
+    const esc = s => (s || '').replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
+
+    const lines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `N:${esc(lastName)};${esc(firstName)};;;`,
+      `FN:${esc(c.name)}`,
+    ];
+    if (c.title)   lines.push(`TITLE:${esc(c.title)}`);
+    if (c.company) lines.push(`ORG:${esc(c.company)}`);
+    if (c.email)   lines.push(`EMAIL;TYPE=WORK,INTERNET:${esc(c.email)}`);
+    if (c.phone)   lines.push(`TEL;TYPE=WORK,VOICE:${esc(c.phone)}`);
+    if (c.website) {
+      const url = c.website.startsWith('http') ? c.website : 'https://' + c.website;
+      lines.push(`URL:${esc(url)}`);
+    }
+    lines.push('END:VCARD');
+
+    const vcf = lines.join('\r\n');
+    const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    // Trigger download — iOS Safari will intercept .vcf and open Contacts
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (c.name ? c.name.replace(/\s+/g, '_') : 'contact') + '.vcf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 </script>
 </body>
