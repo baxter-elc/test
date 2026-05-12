@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CardScan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --text2: #8a867f;
+    --text3: #514e49;
+    --accent: #d4a853;
+    --accent2: #b8904a;
+    --danger: #c94f4f;
+    --success: #4faa7a;
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+
+  /* Desktop block screen */
+  #desktop-block {
+    display: none;
+    position: fixed; inset: 0;
+    background: #0a0a0a;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    text-align: center;
+    padding: 2rem;
+  }
+  #desktop-block svg { width: 64px; height: 64px; margin-bottom: 1.5rem; opacity: 0.4; }
+  #desktop-block h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; color: #f0ede8; margin-bottom: 0.75rem; }
+  #desktop-block p { color: #8a867f; font-size: 1rem; line-height: 1.6; max-width: 320px; }
+
+  @media (min-width: 768px) {
+    #desktop-block { display: flex; }
+    #app { display: none; }
+  }
+
+  #app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+  }
+
+  /* Header */
+  header {
+    padding: 1.25rem 1.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-mark svg { width: 18px; height: 18px; }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  header span {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 300;
+  }
+
+  /* Main content area */
+  main { flex: 1; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+  /* Screen: home */
+  .screen { display: none; flex-direction: column; gap: 1rem; animation: fadeUp 0.25s ease; }
+  .screen.active { display: flex; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  /* Viewfinder / camera zone */
+  .viewfinder {
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 85.6 / 54;
+  }
+  .viewfinder video, .viewfinder img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .viewfinder-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.4);
+    cursor: pointer;
+  }
+  .viewfinder-overlay svg { width: 48px; height: 48px; color: var(--accent); }
+  .viewfinder-overlay p { font-size: 13px; color: rgba(255,255,255,0.7); text-align: center; padding: 0 1rem; }
+  .corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: absolute; width: 22px; height: 22px;
+    border-color: var(--accent); border-style: solid; opacity: 0.7;
+  }
+  .corner-tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+  .corner-tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+  .corner-bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+  .corner-br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+  /* Buttons */
+  .btn {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    -webkit-user-select: none; user-select: none;
+    touch-action: manipulation;
+  }
+  .btn:active { transform: scale(0.97); background: var(--surface2); }
+  .btn.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0a0a;
+    font-weight: 500;
+  }
+  .btn.btn-primary:active { background: var(--accent2); }
+  .btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+
+  /* Section label */
+  .label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 2px;
+  }
+
+  /* Loading */
+  #screen-loading {
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    gap: 1.5rem;
+  }
+  .pulse-ring {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    position: relative;
+    animation: pulse-ring 1.4s ease infinite;
+  }
+  .pulse-ring::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.3;
+    animation: pulse-dot 1.4s ease infinite;
+  }
+  @keyframes pulse-ring { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:0.6} }
+  @keyframes pulse-dot { 0%,100%{opacity:0.3} 50%{opacity:0.7} }
+  #screen-loading p { font-size: 15px; color: var(--text2); }
+
+  /* Result card */
+  .contact-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .contact-hero {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #1a1610 0%, #141414 100%);
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .avatar {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: var(--accent);
+    color: #0a0a0a;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .contact-hero-text h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .contact-hero-text p {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 3px;
+  }
+  .contact-fields { padding: 0.25rem 0; }
+  .field {
+    display: flex;
+    align-items: center;
+    padding: 0.9rem 1.25rem;
+    gap: 1rem;
+    border-bottom: 0.5px solid var(--border);
+    position: relative;
+  }
+  .field:last-child { border-bottom: none; }
+  .field-icon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .field-icon svg { width: 18px; height: 18px; color: var(--accent); }
+  .field-info { flex: 1; min-width: 0; }
+  .field-info small { font-size: 11px; color: var(--text3); display: block; text-transform: uppercase; letter-spacing: 0.06em; }
+  .field-info span { font-size: 14px; color: var(--text); display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .field-info span.empty { color: var(--text3); font-style: italic; }
+  .field-copy {
+    background: none; border: none;
+    color: var(--text3);
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex; align-items: center;
+    transition: color 0.15s;
+    touch-action: manipulation;
+  }
+  .field-copy:active { color: var(--accent); }
+  .field-copy svg { width: 17px; height: 17px; }
+  .field-copy.done { color: var(--success); }
+
+  /* Error */
+  #screen-error {
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    gap: 1rem;
+    text-align: center;
+  }
+  .err-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(201,79,79,0.12);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .err-icon svg { width: 30px; height: 30px; color: var(--danger); }
+  #screen-error h3 { font-family: 'DM Serif Display', serif; font-size: 1.2rem; }
+  #screen-error p { font-size: 14px; color: var(--text2); max-width: 260px; line-height: 1.6; }
+
+  /* Bottom bar */
+  footer {
+    padding: 0.75rem 1.25rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    border-top: 0.5px solid var(--border);
+  }
+
+  canvas { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Desktop block -->
+<div id="desktop-block">
+  <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+  <h1>Mobile only</h1>
+  <p>CardScan is designed for your phone. Open this page on your mobile browser to scan business cards.</p>
+</div>
+
+<!-- App -->
+<div id="app">
+  <canvas id="canvas"></canvas>
+  <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none">
+
+  <header>
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.2" stroke-linecap="round">
+        <rect x="2" y="6" width="20" height="13" rx="2"/>
+        <line x1="6" y1="10" x2="14" y2="10"/>
+        <line x1="6" y1="13.5" x2="11" y2="13.5"/>
+      </svg>
+    </div>
+    <h1>CardScan</h1>
+    <span>AI-powered</span>
+  </header>
+
+  <main>
+
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="viewfinder" id="viewfinder" onclick="openCamera()">
+        <div class="viewfinder-overlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <p>Tap to photograph a business card</p>
+        </div>
+        <div class="corner-tl"></div>
+        <div class="corner-tr"></div>
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+      </div>
+
+      <p class="label">or choose from your photos</p>
+
+      <button class="btn" onclick="document.getElementById('file-input').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        Choose from photo library
+      </button>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="screen" id="screen-preview">
+      <p class="label">Review your photo</p>
+      <div class="viewfinder">
+        <img id="preview-img" src="" alt="Card preview">
+        <div class="corner-tl"></div>
+        <div class="corner-tr"></div>
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+      </div>
+      <button class="btn btn-primary" onclick="scanCard()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Extract contact info
+      </button>
+      <button class="btn" onclick="showScreen('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retake
+      </button>
+    </div>
+
+    <!-- LOADING -->
+    <div class="screen" id="screen-loading">
+      <div class="pulse-ring"></div>
+      <p>Reading the card…</p>
+    </div>
+
+    <!-- RESULT -->
+    <div class="screen" id="screen-result">
+      <p class="label">Contact found</p>
+      <div class="contact-card">
+        <div class="contact-hero">
+          <div class="avatar" id="result-avatar">?</div>
+          <div class="contact-hero-text">
+            <h2 id="result-name">—</h2>
+            <p id="result-title"></p>
+          </div>
+        </div>
+        <div class="contact-fields" id="result-fields"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="showScreen('screen-home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+          </svg>
+          Scan another
+        </button>
+        <button class="btn btn-primary" onclick="copyAll()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy all
+        </button>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div class="screen" id="screen-error">
+      <div class="err-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h3>Couldn't read the card</h3>
+      <p>Make sure the card is well-lit and flat, with text fully in frame.</p>
+      <button class="btn btn-primary" style="width:auto;padding:13px 28px;" onclick="showScreen('screen-home')">Try again</button>
+    </div>
+
+  </main>
+
+  <footer>Images are sent to AI only for extraction · Not stored</footer>
+</div>
+
+<script>
+  let capturedDataURL = null;
+  let lastContact = null;
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function openCamera() {
+    const input = document.getElementById('file-input');
+    input.setAttribute('capture', 'environment');
+    input.click();
+  }
+
+  document.getElementById('file-input').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      capturedDataURL = e.target.result;
+      document.getElementById('preview-img').src = capturedDataURL;
+      showScreen('screen-preview');
+    };
+    reader.readAsDataURL(file);
+    this.value = '';
+  });
+
+  async function scanCard() {
+    if (!capturedDataURL) return;
+    showScreen('screen-loading');
+
+    const base64 = capturedDataURL.split(',')[1];
+    const mediaType = capturedDataURL.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+              { type: 'text', text: 'This is a business card image. Extract contact information and respond ONLY with a JSON object — no markdown, no explanation, no backticks. Use exactly these keys: name (full name or empty string), title (job title or empty string), company (company name or empty string), email (email address or empty string), phone (phone number or empty string), website (website URL or empty string). If a field is not visible or unclear, use empty string.' }
+            ]
+          }]
+        })
+      });
+
+      const data = await res.json();
+      const text = data.content?.map(c => c.text || '').join('') || '';
+      const clean = text.replace(/```json|```/g, '').trim();
+      const contact = JSON.parse(clean);
+      lastContact = contact;
+      renderResult(contact);
+      showScreen('screen-result');
+    } catch(e) {
+      showScreen('screen-error');
+    }
+  }
+
+  function initials(name) {
+    if (!name) return '?';
+    return name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  }
+
+  function renderResult(c) {
+    document.getElementById('result-avatar').textContent = initials(c.name);
+    document.getElementById('result-name').textContent = c.name || 'Unknown';
+    document.getElementById('result-title').textContent = [c.title, c.company].filter(Boolean).join(' · ');
+
+    const fields = [
+      { key: 'email', label: 'Email', href: c.email ? 'mailto:' + c.email : null, icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>` },
+      { key: 'phone', label: 'Phone', href: c.phone ? 'tel:' + c.phone : null, icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.64 3.42 2 2 0 0 1 3.61 1.25h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>` },
+      { key: 'website', label: 'Website', href: c.website ? (c.website.startsWith('http') ? c.website : 'https://' + c.website) : null, icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>` },
+    ];
+
+    const container = document.getElementById('result-fields');
+    container.innerHTML = fields.map(f => {
+      const val = c[f.key];
+      const display = val
+        ? (f.href ? `<a href="${f.href}" style="color:var(--accent);text-decoration:none;">${val}</a>` : val)
+        : `<span class="empty">Not found</span>`;
+      const copyBtn = val
+        ? `<button class="field-copy" onclick="copyField(this,'${val.replace(/'/g,"\\'")}')" aria-label="Copy ${f.label}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+           </button>`
+        : '';
+      return `<div class="field">
+        <div class="field-icon">${f.icon}</div>
+        <div class="field-info">
+          <small>${f.label}</small>
+          <span>${display}</span>
+        </div>
+        ${copyBtn}
+      </div>`;
+    }).join('');
+  }
+
+  function copyField(btn, val) {
+    navigator.clipboard.writeText(val).then(() => {
+      btn.classList.add('done');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+      setTimeout(() => {
+        btn.classList.remove('done');
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+      }, 1500);
+    });
+  }
+
+  function copyAll() {
+    if (!lastContact) return;
+    const parts = [lastContact.name, lastContact.title, lastContact.company, lastContact.email, lastContact.phone, lastContact.website].filter(Boolean);
+    navigator.clipboard.writeText(parts.join('\n'));
+  }
+</script>
+</body>
+</html>
