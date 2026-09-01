@@ -1,636 +1,1188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a84ff">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#B0261F">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Card Scan">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230a84ff'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-size='56' font-family='Apple Color Emoji,Segoe UI Emoji'%3E%F0%9F%93%87%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a84ff'/%3E%3Ctext x='90' y='125' text-anchor='middle' font-size='100' font-family='Apple Color Emoji,Segoe UI Emoji'%3E%F0%9F%93%87%3C/text%3E%3C/svg%3E">
-<title>Card Scanner</title>
+<meta name="apple-mobile-web-app-title" content="Card Scanner">
+<title>Dirt Dog Card Scanner</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    margin: 0; padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
-    background: #f2f2f7;
-    color: #1c1c1e;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
+  :root{
+    --paper:#F2EFEA;
+    --surface:#FFFFFF;
+    --ink:#14181A;
+    --muted:#5F6A63;
+    --rule:#D8DCD4;
+    --brand:#B0261F;
+    --brand-dim:#F6E4E2;
+    --flag:#9A6410;
+    --flag-dim:#F6EBD8;
+    --stop:#8C2F1E;
+    --tint:#FAFBF9;
+    --stop-dim:#F7E7E3;
+    --dock:rgba(242,239,234,.94);
   }
-  body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Open Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:17px;
+    line-height:1.45;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:120px;
   }
-  header {
-    position: sticky; top: 0; z-index: 5;
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    background: rgba(242,242,247,0.85);
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    padding: 14px 20px;
-    text-align: center;
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px}
+
+  header{padding:28px 0 20px}
+  h1{
+    margin:0;
+    font-family:"Libre Caslon Text",Georgia,"Times New Roman",serif;
+    font-size:33px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    line-height:1.1;
+    color:var(--brand);
   }
-  header h1 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.2px; }
-  header .sub { font-size: 12px; color: #8e8e93; margin-top: 2px; }
-  main { max-width: 600px; margin: 0 auto; padding: 16px; }
-  section { display: none; }
-  section.active { display: block; }
-  .hero {
-    text-align: center;
-    padding: 30px 16px 8px;
+  .sechead{
+    font-family:"Libre Caslon Text",Georgia,serif;
+    font-size:20px;font-weight:700;margin:34px 0 10px;
   }
-  .hero .emoji { font-size: 64px; line-height: 1; }
-  .hero h2 { margin: 14px 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-  .hero p { color: #6c6c70; margin: 0 auto; max-width: 360px; font-size: 15px; line-height: 1.4; }
-  .button {
-    display: block; width: 100%;
-    padding: 16px 20px;
-    border: none; border-radius: 14px;
-    background: #0a84ff; color: #fff;
-    font-size: 17px; font-weight: 600;
-    cursor: pointer;
-    transition: transform .05s ease, opacity .15s ease;
-    -webkit-appearance: none;
-    margin-top: 12px;
+  .sub{margin:6px 0 0;color:var(--muted);font-size:15px}
+
+  /* ---- capture slot: a card-shaped well, not a generic button ---- */
+  .slot{
+    position:relative;
+    aspect-ratio:1.75/1;
+    border:1.5px dashed var(--rule);
+    border-radius:10px;
+    background:var(--surface);
+    display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:10px;
+    cursor:pointer;
+    overflow:hidden;
+    transition:border-color .15s ease;
   }
-  .button:active { transform: scale(0.98); }
-  .button.secondary { background: #e5e5ea; color: #1c1c1e; }
-  .button.success { background: #34c759; }
-  .button.danger { background: #ff3b30; }
-  .button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .actions-row { display: flex; gap: 10px; }
-  .actions-row .button { margin-top: 12px; }
-  .preview-wrap {
-    margin-top: 18px;
-    background: #000;
-    border-radius: 14px;
-    overflow: hidden;
-    aspect-ratio: 4/3;
-    display: flex; align-items: center; justify-content: center;
+  .slot:active{border-color:var(--brand)}
+  .slot:focus-visible{outline:2.5px solid var(--brand);outline-offset:3px}
+  .slot p{margin:0;color:var(--muted);font-size:15px;text-align:center;padding:0 20px}
+  .slot strong{display:block;color:var(--ink);font-weight:600;font-size:17px;margin-bottom:3px}
+  .slot canvas{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none}
+  .slot.has-image{border-style:solid;aspect-ratio:auto}
+  .slot.has-image canvas{display:block;position:relative}
+  .slot.has-image .placeholder{display:none}
+
+  .cropnote{
+    margin:8px 0 0;font-size:13.5px;color:var(--muted);
+    display:none;
   }
-  .preview-wrap img { width: 100%; height: 100%; object-fit: contain; }
-  .loading {
-    text-align: center;
-    padding: 40px 20px;
+  .cropnote.on{display:block}
+
+  .row{display:flex;gap:10px;margin-top:12px}
+  button{
+    font-family:inherit;font-size:16px;font-weight:600;
+    border-radius:8px;border:1px solid var(--rule);
+    background:var(--surface);color:var(--ink);
+    padding:12px 16px;cursor:pointer;flex:1;
   }
-  .spinner {
-    width: 48px; height: 48px;
-    margin: 0 auto 16px;
-    border: 4px solid #e5e5ea;
-    border-top-color: #0a84ff;
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
+  button:focus-visible{outline:2.5px solid var(--brand);outline-offset:2px}
+  button:disabled{opacity:.45;cursor:default}
+  button.go{background:var(--brand);border-color:var(--brand);color:#fff}
+
+  /* ---- progress ---- */
+  .progress{display:none;margin-top:16px}
+  .progress.on{display:block}
+  .bar{height:3px;background:var(--rule);border-radius:2px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:var(--brand);transition:width .25s ease}
+  .progress span{display:block;margin-top:8px;font-size:14px;color:var(--muted)}
+
+  /* ---- fields: a ruled ledger, continuous, not chopped cards ---- */
+  .fields{display:none;margin-top:28px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+  .fields.on{display:block}
+  .f{display:flex;align-items:flex-start;border-bottom:1px solid var(--rule);padding:2px 14px}
+  .f:last-child{border-bottom:0}
+  .f label{
+    width:104px;flex:none;padding:14px 0;
+    font-size:14px;color:var(--muted);font-weight:500;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .progress-bar {
-    width: 100%; max-width: 260px;
-    margin: 12px auto 0;
-    height: 6px;
-    background: #e5e5ea;
-    border-radius: 3px;
-    overflow: hidden;
+  .f .val{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:6px 0}
+  .f input,.f textarea{
+    flex:1;min-width:0;width:100%;
+    font-family:inherit;font-size:16.5px;color:var(--ink);
+    background:transparent;border:0;padding:8px 0;
+    font-variant-numeric:tabular-nums;
   }
-  .progress-fill {
-    height: 100%;
-    background: #0a84ff;
-    width: 0%;
-    transition: width .25s ease;
+  .f textarea{resize:vertical;min-height:52px;line-height:1.4}
+  .f input:focus,.f textarea:focus{outline:none}
+  .f:focus-within{background:var(--tint)}
+  .f:focus-within label{color:var(--brand)}
+
+  /* signature element: the uncertainty flag */
+  .flag{
+    flex:none;font-size:12px;font-weight:600;
+    color:var(--flag);background:var(--flag-dim);
+    padding:3px 7px;border-radius:4px;white-space:nowrap;
   }
-  .progress-label { font-size: 13px; color: #8e8e93; margin-top: 8px; }
-  .form-card {
-    background: #fff;
-    border-radius: 14px;
-    margin-top: 14px;
-    overflow: hidden;
+  .f.empty label{color:#96A09A}
+
+  .saved{background:var(--surface);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+  .sv{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--rule)}
+  .sv:last-child{border-bottom:0}
+  .sv .who{flex:1;min-width:0}
+  .sv .nm{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sv .meta{font-size:13.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .sv .del{flex:none;background:none;border:0;color:var(--muted);font-size:22px;line-height:1;padding:4px 8px;cursor:pointer;width:auto}
+  .sv .del:hover,.sv .del:focus-visible{color:var(--stop)}
+  .raw{margin-top:18px;display:none}
+  .raw.on{display:block}
+  .raw summary{font-size:14.5px;color:var(--muted);cursor:pointer;padding:6px 0}
+  .raw pre{
+    white-space:pre-wrap;word-break:break-word;
+    background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+    padding:12px;font-size:13px;line-height:1.5;color:var(--muted);
+    max-height:260px;overflow:auto;margin:6px 0 0;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace;
   }
-  .form-row {
-    display: flex; align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(60,60,67,0.1);
+
+  .hint{margin:26px 0 0;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.4}
+  .msg{margin-top:16px;font-size:15px;padding:12px 14px;border-radius:8px;display:none}
+  .msg.on{display:block}
+  .msg.err{background:var(--stop-dim);color:var(--stop)}
+  .msg.ok{background:var(--brand-dim);color:var(--brand)}
+
+  /* ---- sticky action bar, clear of the home indicator ---- */
+  .dock{
+    position:fixed;left:0;right:0;bottom:0;
+    background:var(--dock);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    border-top:1px solid var(--rule);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    display:none;
   }
-  .form-row:last-child { border-bottom: none; }
-  .form-row label {
-    flex: 0 0 96px;
-    color: #6c6c70;
-    font-size: 14px;
+  .dock.on{display:block}
+  .dock .inner{max-width:560px;margin:0 auto;display:flex;gap:10px}
+  .dock button{padding:15px 16px;font-size:17px}
+
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#0F1211; --surface:#181C1A; --ink:#E8ECE8; --muted:#98A29B;
+      --rule:#2A302C; --brand:#E8736A; --brand-dim:#3A1B18;
+      --flag:#E0A54A; --flag-dim:#33290F; --stop:#F0917A;
+      --tint:#1E2320; --stop-dim:#33201B; --dock:rgba(15,18,17,.94);
+    }
+    button.go{color:#1A0C0A}
+    .f.empty label{color:#6E7872}
   }
-  .form-row input, .form-row textarea {
-    flex: 1;
-    border: none; outline: none;
-    background: transparent;
-    font-size: 16px;
-    color: #1c1c1e;
-    font-family: inherit;
-    padding: 6px 0;
-    width: 100%;
-  }
-  .form-row textarea { resize: vertical; min-height: 22px; }
-  .results-title {
-    font-size: 13px; color: #8e8e93;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin: 18px 0 6px 16px;
-  }
-  .ocr-preview {
-    background: #fff;
-    border-radius: 14px;
-    margin-top: 12px;
-    padding: 14px 16px;
-    font-size: 13px;
-    color: #6c6c70;
-    white-space: pre-wrap;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    max-height: 180px;
-    overflow: auto;
-    border: 1px dashed rgba(0,0,0,0.1);
-  }
-  details summary {
-    margin-top: 18px;
-    color: #0a84ff;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 4px 0;
-  }
-  .hint {
-    text-align: center;
-    color: #8e8e93;
-    font-size: 13px;
-    margin-top: 14px;
-    padding: 0 20px;
-    line-height: 1.4;
-  }
-  .footer {
-    text-align: center;
-    color: #c7c7cc;
-    font-size: 11px;
-    padding: 30px 16px 12px;
-  }
-  .toast {
-    position: fixed;
-    left: 50%;
-    bottom: 30px;
-    transform: translateX(-50%) translateY(140%);
-    background: rgba(28,28,30,0.92);
-    color: #fff;
-    padding: 12px 18px;
-    border-radius: 12px;
-    font-size: 14px;
-    transition: transform .25s ease;
-    z-index: 20;
-    max-width: 80%;
-    text-align: center;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  @media (prefers-color-scheme: dark) {
-    html, body { background: #000; color: #fff; }
-    header { background: rgba(0,0,0,0.7); border-bottom-color: rgba(255,255,255,0.08); }
-    .hero p { color: #98989d; }
-    .form-card { background: #1c1c1e; }
-    .form-row { border-bottom-color: rgba(255,255,255,0.08); }
-    .form-row input, .form-row textarea { color: #fff; }
-    .button.secondary { background: #2c2c2e; color: #fff; }
-    .ocr-preview { background: #1c1c1e; color: #98989d; border-color: rgba(255,255,255,0.1); }
-    header h1 { color: #fff; }
-  }
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <h1>Dirt Dog Card Scanner</h1>
+    <p class="sub">Eshenbaugh Land Company. Snap a card, check what it read, add it to Contacts. Everything stays on your phone.</p>
+  </header>
 
-<header>
-  <h1>📇 Business Card Scanner</h1>
-  <div class="sub">Snap a card → save to Contacts</div>
-</header>
-
-<main>
-  <!-- STEP 1: Capture -->
-  <section id="step-capture" class="active">
-    <div class="hero">
-      <div class="emoji">📇</div>
-      <h2>Scan a Business Card</h2>
-      <p>Take a clear, well-lit photo of the card. Hold steady and fill the frame.</p>
+  <div class="slot" id="slot" tabindex="0" role="button" aria-label="Choose or photograph a business card">
+    <div class="placeholder">
+      <p><strong>Take a photo of the card</strong>Fill the frame. Flat surface, even light.</p>
     </div>
-    <button class="button" id="captureBtn">📷 Take Photo or Choose Image</button>
-    <input type="file" id="fileInput" accept="image/*" capture="environment" hidden>
-    <p class="hint">Tip: On iPhone, tap the share icon → "Add to Home Screen" to use it like an app.</p>
-  </section>
+    <canvas id="preview"></canvas>
+  </div>
+  <p class="cropnote" id="cropnote">Drag the corners to frame just the card — it cuts out background and sharply improves accuracy.</p>
 
-  <!-- STEP 2: Preview -->
-  <section id="step-preview">
-    <div class="preview-wrap"><img id="previewImg" alt="Card preview"></div>
-    <div class="actions-row">
-      <button class="button secondary" id="retakeBtn">Retake</button>
-      <button class="button" id="scanBtn">Scan Card</button>
+  <input type="file" id="file" accept="image/*" capture="environment" hidden>
+
+  <div class="row">
+    <button id="pick">Choose photo</button>
+    <button id="scan" class="go" disabled>Read card</button>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="bar"><i id="barfill"></i></div>
+    <span id="stage">Starting</span>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <div class="fields" id="fields"></div>
+
+  <details class="raw" id="raw">
+    <summary>See the raw text it read</summary>
+    <pre id="rawtext"></pre>
+  </details>
+
+  <div class="row" id="againrow" style="display:none">
+    <button id="again">Scan another card</button>
+  </div>
+
+  <div id="savedwrap" style="display:none">
+    <h2 class="sechead">Scanned cards</h2>
+    <div class="saved" id="savedlist"></div>
+    <div class="row">
+      <button id="clearall">Clear all</button>
+      <button id="csv" class="go">Export all as CSV</button>
     </div>
-  </section>
+  </div>
 
-  <!-- STEP 3: Loading -->
-  <section id="step-loading">
-    <div class="loading">
-      <div class="spinner"></div>
-      <div id="loadingLabel">Reading the card…</div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="progress-label" id="progressLabel">Starting…</div>
-    </div>
-  </section>
+  <p class="hint">On iPhone: tap Share, then Add to Home Screen, to run this like an app.</p>
+</div>
 
-  <!-- STEP 4: Results -->
-  <section id="step-results">
-    <div class="results-title">Review &amp; Edit</div>
-    <div class="form-card">
-      <div class="form-row"><label>First Name</label><input type="text" id="f-firstName" autocomplete="off"></div>
-      <div class="form-row"><label>Last Name</label><input type="text" id="f-lastName" autocomplete="off"></div>
-      <div class="form-row"><label>Company</label><input type="text" id="f-company" autocomplete="off"></div>
-      <div class="form-row"><label>Title</label><input type="text" id="f-title" autocomplete="off"></div>
-      <div class="form-row"><label>Mobile</label><input type="tel" id="f-mobile" autocomplete="off"></div>
-      <div class="form-row"><label>Work Phone</label><input type="tel" id="f-workPhone" autocomplete="off"></div>
-      <div class="form-row"><label>Email</label><input type="email" id="f-email" autocomplete="off"></div>
-      <div class="form-row"><label>Website</label><input type="url" id="f-website" autocomplete="off"></div>
-      <div class="form-row"><label>Address</label><textarea id="f-address" rows="2"></textarea></div>
-      <div class="form-row"><label>Notes</label><textarea id="f-notes" rows="2"></textarea></div>
-    </div>
+<div class="dock" id="dock">
+  <div class="inner">
+    <button id="copy">Copy details</button>
+    <button id="save" class="go">Add to Contacts</button>
+  </div>
+</div>
 
-    <button class="button success" id="saveBtn">💾 Save to Contacts</button>
-    <button class="button secondary" id="newBtn">Scan Another</button>
-
-    <details>
-      <summary>Show raw text from card</summary>
-      <div class="ocr-preview" id="ocrPreview"></div>
-    </details>
-  </section>
-</main>
-
-<div class="footer">Runs entirely in your browser. No data is uploaded.</div>
-<div id="toast" class="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script>
-(() => {
-  // -------- UI helpers --------
-  const sections = {
-    capture:  document.getElementById('step-capture'),
-    preview:  document.getElementById('step-preview'),
-    loading:  document.getElementById('step-loading'),
-    results:  document.getElementById('step-results'),
+"use strict";
+
+/* ===PARSER_START=== */
+const STATES = "AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC";
+
+const RE = {
+  email: /[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/,
+  url: /(?:https?:\/\/)?(?:www\.)?[A-Za-z0-9][A-Za-z0-9\-]*(?:\.[A-Za-z0-9\-]+)*\.(?:com|net|org|io|co|us|biz|info|realty|properties|group|homes|dev|app|me|land|llc)(?:\/[^\s]*)?/i,
+  phone: /(?:\+?1[\s.\-]?)?\(?([0-9]{3})\)?[\s.\-]?([0-9]{3})[\s.\-]?([0-9]{4})(?!\d)/,
+  zip: /\b\d{5}(?:-\d{4})?\b/,
+  cityStateZip: new RegExp("([A-Za-z][A-Za-z .'\\-]+),?\\s+(" + STATES + ")\\.?,?\\s+(\\d{5}(?:-\\d{4})?)", "i"),
+  street: /\b\d+\s+[\w.'\-]+(?:\s+[\w.'\-]+)*\s+(?:st|street|ave|avenue|rd|road|blvd|boulevard|dr|drive|ln|lane|way|pkwy|parkway|ct|court|cir|circle|pl|place|hwy|highway|trl|trail|ter|terrace|loop|run|pike|sq)\b\.?/i,
+  suite: /\b(?:ste|suite|unit|apt|#|bldg|building|floor|fl)\.?\s*[\w\-]+/i,
+  poBox: /\bp\.?\s*o\.?\s*box\s*\d+/i,
+};
+
+const COMPANY_WORDS = /\b(llc|l\.l\.c|inc|inc\.|incorporated|corp|corporation|co\.|company|ltd|lp|llp|pllc|pa|group|realty|properties|property|partners|associates|holdings|enterprises|capital|ventures|development|developers|construction|contracting|services|solutions|advisors|advisory|brokerage|industries|systems|logistics|management|investments|bank|title|engineering|architects|law|firm|real estate|& sons|and sons)\b/i;
+
+const TITLE_WORDS = /\b(broker|realtor|agent|president|vice president|vp|svp|evp|director|manager|managing|principal|partner|founder|co-founder|owner|ceo|cfo|coo|cto|cio|chairman|associate|consultant|specialist|advisor|adviser|analyst|coordinator|administrator|engineer|architect|attorney|counsel|accountant|controller|supervisor|superintendent|estimator|foreman|executive|officer|representative|rep|sales|leasing|acquisitions|dispositions|underwriter|appraiser|surveyor|planner|developer|of operations|of sales)\b/i;
+
+const CREDENTIALS = /\b(ccim|sior|cpm|mai|sr\/wa|leed(?:\s*ap)?|ccm|pe|aia|ala|esq|cpa|mba|phd|ph\.d|jd|j\.d|ms|m\.s|ba|bs|cfa|cfp|pmp|gri|abr|crs|e-pro|rpa|fma|cai|aaro?)\b\.?/gi;
+
+const NAME_SUFFIX = /\b(jr|sr|ii|iii|iv|v)\b\.?/i;
+
+const HONORIFIC = /^(dr|mr|mrs|ms|miss|mx|prof|professor|sir|madam|rev|hon|capt|col|sgt|lt)\.?$/i;
+
+const NOISE_WORDS = /\b(www|com|net|org|email|phone|mobile|cell|office|fax|tel|direct|main|address|contact|follow us|scan me)\b/i;
+
+/* ---------- OCR cleanup ---------- */
+
+const MIN_WORD_CONF = 55;
+const LOOSE_WORD_CONF = 30;
+const MIN_LINE_CONF = 45;
+
+function looksValuable(text) {
+  return /[@]/.test(text) || /\d{3}/.test(text) || RE.url.test(text);
+}
+
+// Pull a flat list of {text, conf, height, top} lines out of a Tesseract result,
+// tolerating both the v4 (data.lines) and v5 (data.blocks) response shapes.
+function collectLines(data) {
+  const raw = [];
+  const pushLine = (l) => { if (l) raw.push(l); };
+  const walk = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node.lines)) node.lines.forEach(pushLine);
+    if (Array.isArray(node.paragraphs)) node.paragraphs.forEach(walk);
+    if (Array.isArray(node.blocks)) node.blocks.forEach(walk);
   };
-  function show(name) {
-    Object.values(sections).forEach(s => s.classList.remove('active'));
-    sections[name].classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-  function toast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => el.classList.remove('show'), 2400);
-  }
+  if (Array.isArray(data.blocks)) data.blocks.forEach(walk);
+  if (!raw.length && Array.isArray(data.lines)) data.lines.forEach(pushLine);
 
-  // -------- Capture --------
-  const fileInput = document.getElementById('fileInput');
-  document.getElementById('captureBtn').addEventListener('click', () => fileInput.click());
-  document.getElementById('retakeBtn').addEventListener('click', () => { fileInput.value = ''; show('capture'); });
-  document.getElementById('newBtn').addEventListener('click', () => { fileInput.value = ''; show('capture'); });
-
-  let currentImageDataUrl = null;
-
-  fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      currentImageDataUrl = reader.result;
-      document.getElementById('previewImg').src = currentImageDataUrl;
-      show('preview');
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // -------- Scan --------
-  document.getElementById('scanBtn').addEventListener('click', async () => {
-    if (!currentImageDataUrl) return;
-    show('loading');
-    const progressFill = document.getElementById('progressFill');
-    const progressLabel = document.getElementById('progressLabel');
-    progressFill.style.width = '0%';
-    progressLabel.textContent = 'Loading recognizer…';
-
-    try {
-      // Preprocess: enlarge & boost contrast for better OCR on small cards.
-      const processed = await preprocessImage(currentImageDataUrl);
-
-      const result = await Tesseract.recognize(processed, 'eng', {
-        logger: m => {
-          if (m.status) {
-            progressLabel.textContent = capitalize(m.status) + '…';
-          }
-          if (typeof m.progress === 'number') {
-            progressFill.style.width = Math.round(m.progress * 100) + '%';
-          }
-        }
-      });
-
-      const rawText = (result && result.data && result.data.text) || '';
-      const parsed = parseCardText(rawText);
-      fillForm(parsed, rawText);
-      show('results');
-    } catch (err) {
-      console.error(err);
-      toast('Couldn’t read that card. Try a clearer photo.');
-      show('preview');
-    }
-  });
-
-  // -------- Image preprocessing --------
-  function preprocessImage(dataUrl) {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        // Upscale small images and convert to grayscale with contrast boost.
-        const maxSide = 1600;
-        let { width, height } = img;
-        const scale = Math.min(maxSide / Math.max(width, height), 2);
-        width = Math.round(width * scale);
-        height = Math.round(height * scale);
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        try {
-          const imgData = ctx.getImageData(0, 0, width, height);
-          const d = imgData.data;
-          // Grayscale + simple contrast stretch
-          let min = 255, max = 0;
-          for (let i = 0; i < d.length; i += 4) {
-            const g = (d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114) | 0;
-            d[i] = d[i+1] = d[i+2] = g;
-            if (g < min) min = g;
-            if (g > max) max = g;
-          }
-          const range = Math.max(1, max - min);
-          for (let i = 0; i < d.length; i += 4) {
-            const v = ((d[i] - min) * 255 / range) | 0;
-            d[i] = d[i+1] = d[i+2] = v;
-          }
-          ctx.putImageData(imgData, 0, 0);
-        } catch (e) { /* fall through with raw */ }
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
-    });
-  }
-
-  // -------- Parsing --------
-  const EMAIL_RE = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
-  const URL_RE   = /\b((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9][a-zA-Z0-9\-]*\.(?:com|net|org|io|co|us|edu|gov|biz|info|app|dev|me|tv|ai|tech|design|store|shop)(?:\/[^\s]*)?)\b/gi;
-  const PHONE_RE = /(?:\+?\d{1,3}[\s.\-]?)?(?:\(?\d{3}\)?[\s.\-]?)\d{3}[\s.\-]?\d{4}/g;
-  const ZIP_RE   = /\b\d{5}(?:-\d{4})?\b/;
-  const STATE_RE = /\b(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/;
-  const STREET_RE = /\b(?:Street|St\.?|Road|Rd\.?|Avenue|Ave\.?|Boulevard|Blvd\.?|Drive|Dr\.?|Lane|Ln\.?|Way|Court|Ct\.?|Suite|Ste\.?|Floor|Fl\.?|Highway|Hwy\.?|Parkway|Pkwy\.?|Circle|Cir\.?)\b/i;
-  const TITLE_RE = /\b(CEO|CTO|CFO|COO|CIO|CMO|President|Vice\s+President|VP|EVP|SVP|Director|Manager|Engineer|Developer|Designer|Architect|Specialist|Coordinator|Analyst|Consultant|Owner|Founder|Co[\-\s]?Founder|Partner|Principal|Associate|Senior|Junior|Lead|Head|Chief|Officer|Administrator|Supervisor|Producer|Editor|Writer|Marketing|Sales|Account|Recruiter|Realtor|Agent|Broker|Attorney|Lawyer|Counsel|Accountant|Advisor|Strategist|Representative|Rep|Technician)\b/i;
-  const COMPANY_RE = /\b(LLC|L\.L\.C\.?|Inc\.?|Incorporated|Corp\.?|Corporation|Limited|Ltd\.?|Co\.?|Company|Group|Services|Solutions|Technologies|Systems|Associates|Partners|Enterprises|Holdings|Studios|Agency|Media|Consulting|Realty|Properties|Capital|Ventures|Industries|International)\b/i;
-  const PHONE_LABEL = /(?:mobile|cell|cellular|mob\b|c\b|m\b|direct|office|work|tel|phone|main|fax|f\b|t\b|p\b|toll[\s\-]?free|home|h\b)\s*[:.\-]?/i;
-  const FAX_LABEL   = /\bfax\b|\bf:\s/i;
-
-  function parseCardText(rawText) {
-    const lines = rawText
+  if (!raw.length) {
+    return String(data.text || "")
       .split(/\r?\n/)
-      .map(l => l.replace(/\s+/g, ' ').trim())
-      .filter(l => l.length > 1);
+      .map((t) => ({ text: t.trim(), conf: 60, height: 1, top: 0 }))
+      .filter((l) => l.text.length > 1);
+  }
 
-    const out = {
-      firstName: '', lastName: '', company: '', title: '',
-      mobile: '', workPhone: '', email: '', website: '',
-      address: '', notes: ''
-    };
-    const used = new Set();
-
-    // Emails (collect all; first wins)
-    lines.forEach((line, i) => {
-      const m = line.match(EMAIL_RE);
-      if (m) {
-        if (!out.email) out.email = m[0].toLowerCase();
-        // mark only if the line is essentially the email
-        if (line.replace(EMAIL_RE, '').replace(/[\s:.,\-]/g, '').length < 3) used.add(i);
-      }
-    });
-
-    // Websites (avoid email's domain part)
-    lines.forEach((line, i) => {
-      if (used.has(i)) return;
-      const cleaned = line.replace(EMAIL_RE, '');
-      const m = cleaned.match(URL_RE);
-      if (m && !out.website) {
-        let url = m[0].replace(/[),.;]+$/, '');
-        out.website = url;
-        if (cleaned.replace(URL_RE, '').replace(/[\s:.,\-]/g, '').length < 3) used.add(i);
-      }
-    });
-
-    // Phones
-    const phoneHits = [];
-    lines.forEach((line, i) => {
-      const matches = line.match(PHONE_RE) || [];
-      matches.forEach(num => {
-        const ctx = line.toLowerCase();
-        const isFax = FAX_LABEL.test(ctx);
-        const isMobile = /\b(mobile|cell|cellular|mob|m|c)\b\s*[:.\-]?/.test(ctx) ||
-                         /\bcell\b|\bmobile\b/.test(ctx);
-        const isWork = /\b(office|work|direct|tel|phone|main|t|p|o|w)\b\s*[:.\-]?/.test(ctx) && !isMobile;
-        phoneHits.push({ num: prettifyPhone(num), isFax, isMobile, isWork, lineIdx: i });
+  const out = [];
+  for (const line of raw) {
+    const words = Array.isArray(line.words) ? line.words : [];
+    let kept, conf;
+    if (words.length) {
+      const good = words.filter((w) => {
+        const c = w.confidence ?? 0;
+        const t = String(w.text || "").trim();
+        if (!t) return false;
+        return c >= MIN_WORD_CONF || (c >= LOOSE_WORD_CONF && looksValuable(t));
       });
-      if (matches.length && line.replace(PHONE_RE, '').replace(PHONE_LABEL, '').replace(/[\s:.,\-()]/g, '').length < 3) {
-        used.add(i);
-      }
+      if (!good.length) continue;
+      kept = good.map((w) => String(w.text).trim()).join(" ");
+      conf = good.reduce((a, w) => a + (w.confidence ?? 0), 0) / good.length;
+    } else {
+      kept = String(line.text || "").trim();
+      conf = line.confidence ?? 0;
+    }
+
+    kept = kept.replace(/\s{2,}/g, " ").trim();
+    if (!kept) continue;
+    if (conf < MIN_LINE_CONF && !looksValuable(kept)) continue;
+
+    // Drop lines that are mostly punctuation/noise fragments — the classic
+    // "a a a ee SE NS DE" garbage from background clutter.
+    const letters = (kept.match(/[A-Za-z0-9@.]/g) || []).length;
+    if (letters < 2) continue;
+    if (letters / kept.length < 0.55 && !looksValuable(kept)) continue;
+    const tokens = kept.split(/\s+/);
+    const stubs = tokens.filter((t) => t.replace(/[^A-Za-z0-9]/g, "").length <= 1).length;
+    if (tokens.length >= 3 && stubs / tokens.length > 0.5 && !looksValuable(kept)) continue;
+
+    const bb = line.bbox || {};
+    out.push({
+      text: kept,
+      conf: Math.round(conf),
+      height: bb.y1 != null && bb.y0 != null ? bb.y1 - bb.y0 : 1,
+      top: bb.y0 ?? 0,
     });
-    // Prefer explicit mobile first, then work, then anything else
-    const mobileHit = phoneHits.find(p => p.isMobile && !p.isFax);
-    if (mobileHit) out.mobile = mobileHit.num;
-    const workHit = phoneHits.find(p => p.isWork && !p.isFax && p.num !== out.mobile);
-    if (workHit) out.workPhone = workHit.num;
-    if (!out.mobile) {
-      const any = phoneHits.find(p => !p.isFax && p.num !== out.workPhone);
-      if (any) out.mobile = any.num;
-    }
-    if (!out.workPhone) {
-      const any = phoneHits.find(p => !p.isFax && p.num !== out.mobile);
-      if (any) out.workPhone = any.num;
-    }
+  }
+  return out;
+}
 
-    // Title and Company
+/* ---------- helpers ---------- */
+
+function fmtPhone(m) {
+  return "(" + m[1] + ") " + m[2] + "-" + m[3];
+}
+
+function labelFrom(ctx) {
+  if (!ctx) return null;
+  const s = ctx.toLowerCase();
+  if (/\b(fax|fx|f)\b/.test(s)) return "fax";
+  if (/\b(c|cell|mobile|mob|cel|m)\b/.test(s)) return "mobile";
+  if (/\b(o|office|tel|telephone|ph|phone|direct|dir|main|work|t|d|w|p)\b/.test(s)) return "work";
+  return null;
+}
+
+// Read the label from the text immediately BEFORE the number first. The text
+// after a number is usually the *next* number's label, so it is only a fallback
+// and is cut at the first digit.
+function labelForPhone(before, after) {
+  return labelFrom(before.slice(-12)) || labelFrom(String(after).split(/\d/)[0].slice(0, 8));
+}
+
+function titleCaseName(s) {
+  return s
+    .split(/\s+/)
+    .map((w) =>
+      w.length <= 3 && w === w.toUpperCase() && !/^[A-Z]\.?$/.test(w)
+        ? w
+        : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
+    .join(" ");
+}
+
+function looksLikeName(text) {
+  const t = text.replace(CREDENTIALS, "").replace(/[,|]/g, " ").trim();
+  if (!t) return false;
+  if (/\d/.test(t) || /@/.test(t)) return false;
+  if (t.length > 42) return false;
+  if (COMPANY_WORDS.test(t)) return false;
+  if (NOISE_WORDS.test(t)) return false;
+  const tokens = t.split(/\s+/).filter(Boolean);
+  if (tokens.length < 2 || tokens.length > 4) return false;
+  return tokens.every((w) => /^[A-Za-z][A-Za-z.'\-]*$/.test(w));
+}
+
+/* ---------- field extraction ---------- */
+
+function extractFields(lines) {
+  const f = {
+    first: "", middle: "", last: "", company: "", title: "",
+    mobile: "", work: "", email: "", website: "",
+    address: "", notes: "",
+  };
+  const why = {};
+  const used = new Set();
+  const claim = (i, field, conf) => { used.add(i); if (!why[field]) why[field] = conf; };
+
+  // 1. Email — highest signal, zero ambiguity.
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].text.match(RE.email);
+    if (m && !f.email) {
+      f.email = m[0].replace(/[.,;]$/, "").toLowerCase();
+      claim(i, "email", lines[i].conf);
+      if (lines[i].text.replace(m[0], "").replace(/[^A-Za-z0-9]/g, "").length < 3) used.add(i);
+    }
+  }
+
+  // 2. Phones — label-aware, falls back to document order.
+  const unlabeled = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (used.has(i) && !RE.phone.test(lines[i].text)) continue;
+    let rest = lines[i].text;
+    let guard = 0;
+    while (guard++ < 4) {
+      const m = rest.match(RE.phone);
+      if (!m) break;
+      const before = rest.slice(Math.max(0, m.index - 14), m.index);
+      const after = rest.slice(m.index + m[0].length, m.index + m[0].length + 6);
+      const label = labelForPhone(before, after);
+      const num = fmtPhone(m);
+      if (label === "mobile" && !f.mobile) { f.mobile = num; claim(i, "mobile", lines[i].conf); }
+      else if (label === "work" && !f.work) { f.work = num; claim(i, "work", lines[i].conf); }
+      else if (label !== "fax") unlabeled.push({ num, i, conf: lines[i].conf });
+      rest = rest.slice(m.index + m[0].length);
+    }
+  }
+  for (const p of unlabeled) {
+    if (!f.work) { f.work = p.num; claim(p.i, "work", p.conf); }
+    else if (!f.mobile) { f.mobile = p.num; claim(p.i, "mobile", p.conf); }
+  }
+
+  // 3. Website — must not be the email's domain.
+  const emailDomain = f.email ? f.email.split("@")[1] : "";
+  for (let i = 0; i < lines.length; i++) {
+    if (f.website) break;
+    const candidate = lines[i].text.replace(RE.email, " ");
+    const m = candidate.match(RE.url);
+    if (!m) continue;
+    const host = m[0].replace(/^https?:\/\//i, "").replace(/^www\./i, "").split("/")[0].toLowerCase();
+    if (!host.includes(".")) continue;
+    f.website = m[0].replace(/[.,;]$/, "");
+    claim(i, "website", lines[i].conf);
+    if (host === emailDomain) { /* still useful, keep it */ }
+  }
+
+  // 4. Address — anchor on city/state/zip or a street pattern, then stitch
+  //    the neighbouring line so "123 Main St" + "Orlando, FL 32801" stay together.
+  let addrIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (used.has(i)) continue;
+    if (RE.cityStateZip.test(lines[i].text) || RE.zip.test(lines[i].text)) { addrIdx = i; break; }
+  }
+  if (addrIdx === -1) {
     for (let i = 0; i < lines.length; i++) {
       if (used.has(i)) continue;
-      const line = lines[i];
-      if (COMPANY_RE.test(line) && !out.company) {
-        out.company = cleanLine(line);
-        used.add(i);
-        continue;
-      }
-      if (TITLE_RE.test(line) && !out.title && !COMPANY_RE.test(line)) {
-        out.title = cleanLine(line);
-        used.add(i);
-      }
+      if (RE.street.test(lines[i].text) || RE.poBox.test(lines[i].text)) { addrIdx = i; break; }
     }
-
-    // Name: look for a clean line of 2-4 words, mostly letters, no digits.
-    const HONORIFIC_RE = /^(Dr|Mr|Mrs|Ms|Miss|Mx|Prof|Professor|Sir|Madam|Rev|Hon)\.?$/i;
-    for (let i = 0; i < lines.length; i++) {
-      if (used.has(i)) continue;
-      const line = lines[i];
-      if (PHONE_RE.test(line) || EMAIL_RE.test(line) || URL_RE.test(line)) continue;
-      if (COMPANY_RE.test(line) || TITLE_RE.test(line)) continue;
-      if (/\d/.test(line)) continue;
-      const cleaned = line.replace(/[^a-zA-Z\s\.\-']/g, '').trim();
-      let parts = cleaned.split(/\s+/).filter(Boolean);
-      // Strip leading honorific (Dr., Mr., etc.)
-      if (parts.length > 1 && HONORIFIC_RE.test(parts[0])) parts = parts.slice(1);
-      if (parts.length >= 2 && parts.length <= 4 && parts.join(' ').length >= 4 && parts.join(' ').length <= 50) {
-        // require leading uppercase on first two words
-        if (/^[A-Z]/.test(parts[0]) && /^[A-Z]/.test(parts[1])) {
-          out.firstName = parts[0];
-          out.lastName = parts.slice(1).join(' ');
-          used.add(i);
-          break;
-        }
-      }
+  }
+  if (addrIdx !== -1) {
+    const parts = [];
+    const prev = lines[addrIdx - 1];
+    const isStreet = (t) => RE.street.test(t) || RE.poBox.test(t) || RE.suite.test(t);
+    if (prev && !used.has(addrIdx - 1) && isStreet(prev.text) && !RE.cityStateZip.test(prev.text)) {
+      parts.push(prev.text); claim(addrIdx - 1, "address", prev.conf);
     }
-
-    // Address: gather lines mentioning street keywords, state codes, or ZIPs.
-    const addrLines = [];
-    for (let i = 0; i < lines.length; i++) {
-      if (used.has(i)) continue;
-      const line = lines[i];
-      if (PHONE_RE.test(line) || EMAIL_RE.test(line) || URL_RE.test(line)) continue;
-      if (STREET_RE.test(line) || ZIP_RE.test(line) || (STATE_RE.test(line) && /\d/.test(line))) {
-        addrLines.push(line);
-        used.add(i);
-      }
+    parts.push(lines[addrIdx].text);
+    claim(addrIdx, "address", lines[addrIdx].conf);
+    const next = lines[addrIdx + 1];
+    if (next && !used.has(addrIdx + 1) && !RE.cityStateZip.test(lines[addrIdx].text) &&
+        RE.cityStateZip.test(next.text)) {
+      parts.push(next.text); claim(addrIdx + 1, "address", next.conf);
     }
-    if (addrLines.length) out.address = addrLines.join(', ');
-
-    // Anything else goes to notes (excluding pure phone lines).
-    // But: if we still have no company and there's exactly one short leftover, treat it as company.
-    const leftovers = [];
-    for (let i = 0; i < lines.length; i++) {
-      if (used.has(i)) continue;
-      const line = lines[i];
-      if (PHONE_RE.test(line) && line.replace(PHONE_RE, '').replace(/[\s:.,\-()]/g, '').length < 3) continue;
-      leftovers.push({ line, idx: i });
-    }
-    if (!out.company) {
-      const candidate = leftovers.find(o => o.line.length <= 60 && !/[@\/]/.test(o.line));
-      if (candidate) {
-        out.company = cleanLine(candidate.line);
-        const k = leftovers.indexOf(candidate);
-        leftovers.splice(k, 1);
-      }
-    }
-    if (leftovers.length) out.notes = leftovers.map(o => o.line).join('\n');
-
-    return out;
+    f.address = parts.join(", ").replace(/,\s*,/g, ",").replace(/\s{2,}/g, " ").trim();
   }
 
-  function prettifyPhone(num) {
-    const digits = num.replace(/\D/g, '');
-    if (digits.length === 10) {
-      return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+  // 5. Company — corporate suffix wins; otherwise the biggest unused line.
+  for (let i = 0; i < lines.length; i++) {
+    if (used.has(i) || f.company) continue;
+    if (COMPANY_WORDS.test(lines[i].text) && !looksLikeName(lines[i].text)) {
+      f.company = lines[i].text.replace(/[|•]+/g, " ").replace(/\s{2,}/g, " ").trim();
+      claim(i, "company", lines[i].conf);
     }
-    if (digits.length === 11 && digits.startsWith('1')) {
-      return `+1 (${digits.slice(1,4)}) ${digits.slice(4,7)}-${digits.slice(7)}`;
+  }
+
+  // 6. Name — a person-shaped line, preferring the largest type.
+  const nameCandidates = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (used.has(i)) continue;
+    if (looksLikeName(lines[i].text)) nameCandidates.push({ i, ...lines[i] });
+  }
+  nameCandidates.sort((a, b) => (b.height - a.height) || (a.i - b.i));
+  if (nameCandidates.length) {
+    const pick = nameCandidates[0];
+    let t = pick.text;
+    const creds = t.match(CREDENTIALS);
+    t = t.replace(CREDENTIALS, "").replace(/[,|]+\s*$/, "").replace(/\s{2,}/g, " ").trim();
+    const tokens = titleCaseName(t).split(/\s+/);
+    // Strip a leading honorific so "Dr. Sarah Nguyen" does not become first="Dr."
+    while (tokens.length > 2 && HONORIFIC.test(tokens[0])) tokens.shift();
+    let suffix = "";
+    if (tokens.length > 2 && NAME_SUFFIX.test(tokens[tokens.length - 1])) suffix = tokens.pop();
+    f.first = tokens.shift() || "";
+    if (tokens.length > 1 && /^[A-Za-z]\.?$/.test(tokens[0])) f.middle = tokens.shift();
+    f.last = (tokens.join(" ") + (suffix ? " " + suffix : "")).trim();
+    claim(pick.i, "name", pick.conf);
+    if (creds) f.notes = creds.join(", ");
+  }
+
+  // 7. Title — after name/company are settled, so "Land Group" can't steal it.
+  for (let i = 0; i < lines.length; i++) {
+    if (used.has(i) || f.title) continue;
+    const t = lines[i].text;
+    if (t.length > 60) continue;
+    if (TITLE_WORDS.test(t) && !COMPANY_WORDS.test(t)) {
+      f.title = t.replace(/[|•]+/g, " ").replace(/\s{2,}/g, " ").trim();
+      claim(i, "title", lines[i].conf);
     }
-    return num.trim();
   }
 
-  function cleanLine(s) {
-    return s.replace(/^[\s\W_]+|[\s\W_]+$/g, '');
-  }
-
-  function capitalize(s) {
-    return s.replace(/\b\w/g, c => c.toUpperCase());
-  }
-
-  function fillForm(p, raw) {
-    document.getElementById('f-firstName').value = p.firstName || '';
-    document.getElementById('f-lastName').value  = p.lastName  || '';
-    document.getElementById('f-company').value   = p.company   || '';
-    document.getElementById('f-title').value     = p.title     || '';
-    document.getElementById('f-mobile').value    = p.mobile    || '';
-    document.getElementById('f-workPhone').value = p.workPhone || '';
-    document.getElementById('f-email').value     = p.email     || '';
-    document.getElementById('f-website').value   = p.website   || '';
-    document.getElementById('f-address').value   = p.address   || '';
-    document.getElementById('f-notes').value     = p.notes     || '';
-    document.getElementById('ocrPreview').textContent = raw.trim() || '(empty)';
-  }
-
-  // -------- vCard --------
-  function escapeVCard(v) {
-    return (v || '').replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\r?\n/g, '\\n');
-  }
-
-  function buildVCard(c) {
-    const lines = [];
-    lines.push('BEGIN:VCARD');
-    lines.push('VERSION:3.0');
-    lines.push(`N:${escapeVCard(c.lastName)};${escapeVCard(c.firstName)};;;`);
-    const fn = [c.firstName, c.lastName].filter(Boolean).join(' ').trim() || c.company || 'New Contact';
-    lines.push(`FN:${escapeVCard(fn)}`);
-    if (c.company) lines.push(`ORG:${escapeVCard(c.company)}`);
-    if (c.title)   lines.push(`TITLE:${escapeVCard(c.title)}`);
-    if (c.mobile)    lines.push(`TEL;TYPE=CELL,VOICE:${escapeVCard(c.mobile)}`);
-    if (c.workPhone) lines.push(`TEL;TYPE=WORK,VOICE:${escapeVCard(c.workPhone)}`);
-    if (c.email)   lines.push(`EMAIL;TYPE=INTERNET,WORK:${escapeVCard(c.email)}`);
-    if (c.website) {
-      let url = c.website;
-      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-      lines.push(`URL:${escapeVCard(url)}`);
+  // 8. Company fallback — largest remaining line, if we still have none.
+  if (!f.company) {
+    const rest = lines
+      .map((l, i) => ({ ...l, i }))
+      .filter((l) => !used.has(l.i) && l.text.length >= 3 && !NOISE_WORDS.test(l.text) && !/^\W+$/.test(l.text));
+    rest.sort((a, b) => (b.height - a.height) || (a.i - b.i));
+    if (rest.length) {
+      f.company = rest[0].text.replace(/\s{2,}/g, " ").trim();
+      claim(rest[0].i, "company", rest[0].conf);
     }
-    if (c.address) lines.push(`ADR;TYPE=WORK:;;${escapeVCard(c.address)};;;;`);
-    if (c.notes)   lines.push(`NOTE:${escapeVCard(c.notes)}`);
-    lines.push(`REV:${new Date().toISOString()}`);
-    lines.push('END:VCARD');
-    return lines.join('\r\n');
   }
 
-  function getFormData() {
-    return {
-      firstName: document.getElementById('f-firstName').value.trim(),
-      lastName:  document.getElementById('f-lastName').value.trim(),
-      company:   document.getElementById('f-company').value.trim(),
-      title:     document.getElementById('f-title').value.trim(),
-      mobile:    document.getElementById('f-mobile').value.trim(),
-      workPhone: document.getElementById('f-workPhone').value.trim(),
-      email:     document.getElementById('f-email').value.trim(),
-      website:   document.getElementById('f-website').value.trim(),
-      address:   document.getElementById('f-address').value.trim(),
-      notes:     document.getElementById('f-notes').value.trim(),
-    };
-  }
+  // 9. Everything unclaimed goes to Notes rather than being silently dropped.
+  const leftovers = lines.filter((_, i) => !used.has(i)).map((l) => l.text);
+  const notes = [f.notes, ...leftovers].filter(Boolean).join("\n").trim();
+  f.notes = notes;
 
-  document.getElementById('saveBtn').addEventListener('click', () => {
-    const c = getFormData();
-    if (!c.firstName && !c.lastName && !c.company) {
-      toast('Please add at least a name or company.');
+  return { fields: f, confidence: why };
+}
+/* ===PARSER_END=== *
+
+/* ============ image preprocessing ============ */
+/* Bad OCR on phone photos is almost always a contrast/lighting problem, not a
+   Tesseract problem. We normalise the image before it ever reaches the engine. */
+
+const MAX_W = 1700;
+const MIN_W = 1100;
+
+function toCanvas(src, sx, sy, sw, sh) {
+  let scale = 1;
+  if (sw > MAX_W) scale = MAX_W / sw;
+  else if (sw < MIN_W) scale = Math.min(2.5, MIN_W / sw);
+  const c = document.createElement("canvas");
+  c.width = Math.round(sw * scale);
+  c.height = Math.round(sh * scale);
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  return c;
+}
+
+function toGray(canvas) {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = img.data;
+  const gray = new Uint8ClampedArray(canvas.width * canvas.height);
+  for (let i = 0, p = 0; i < d.length; i += 4, p++) {
+    gray[p] = (d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114) | 0;
+  }
+  return gray;
+}
+
+// Stretch the middle of the histogram out to the full range so faded ink and
+// grey cardstock separate properly.
+function stretch(gray) {
+  const hist = new Uint32Array(256);
+  for (let i = 0; i < gray.length; i++) hist[gray[i]]++;
+  const cut = gray.length * 0.02;
+  let lo = 0, hi = 255, acc = 0;
+  for (let v = 0; v < 256; v++) { acc += hist[v]; if (acc > cut) { lo = v; break; } }
+  acc = 0;
+  for (let v = 255; v >= 0; v--) { acc += hist[v]; if (acc > cut) { hi = v; break; } }
+  if (hi - lo < 24) return gray;
+  const span = hi - lo;
+  const out = new Uint8ClampedArray(gray.length);
+  for (let i = 0; i < gray.length; i++) {
+    out[i] = Math.max(0, Math.min(255, ((gray[i] - lo) * 255) / span));
+  }
+  return out;
+}
+
+// Local mean threshold via integral image. Handles the uneven lighting and
+// shadow across a card held in one hand, which a global threshold cannot.
+function adaptive(gray, w, h, C) {
+  const win = Math.max(15, (Math.floor(w * 0.12) | 1));
+  const r = win >> 1;
+  const I = new Float64Array((w + 1) * (h + 1));
+  for (let y = 0; y < h; y++) {
+    let run = 0;
+    for (let x = 0; x < w; x++) {
+      run += gray[y * w + x];
+      I[(y + 1) * (w + 1) + (x + 1)] = I[y * (w + 1) + (x + 1)] + run;
+    }
+  }
+  const out = new Uint8ClampedArray(w * h);
+  for (let y = 0; y < h; y++) {
+    const y0 = Math.max(0, y - r), y1 = Math.min(h - 1, y + r);
+    for (let x = 0; x < w; x++) {
+      const x0 = Math.max(0, x - r), x1 = Math.min(w - 1, x + r);
+      const n = (y1 - y0 + 1) * (x1 - x0 + 1);
+      const s = I[(y1 + 1) * (w + 1) + (x1 + 1)] - I[y0 * (w + 1) + (x1 + 1)]
+              - I[(y1 + 1) * (w + 1) + x0] + I[y0 * (w + 1) + x0];
+      out[y * w + x] = gray[y * w + x] > s / n - C ? 255 : 0;
+    }
+  }
+  return out;
+}
+
+function grayToCanvas(gray, w, h) {
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  const ctx = c.getContext("2d");
+  const img = ctx.createImageData(w, h);
+  for (let p = 0, i = 0; p < gray.length; p++, i += 4) {
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = gray[p];
+    img.data[i + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return c;
+}
+
+function variants(src, sx, sy, sw, sh) {
+  const base = toCanvas(src, sx, sy, sw, sh);
+  const w = base.width, h = base.height;
+  const g = stretch(toGray(base));
+  return {
+    binary: grayToCanvas(adaptive(g, w, h, 12), w, h),
+    grey: grayToCanvas(g, w, h),
+  };
+}
+
+/* ============ OCR ============ */
+
+let worker = null;
+
+async function getWorker(onProgress) {
+  if (worker) return worker;
+  worker = await Tesseract.createWorker("eng", 1, {
+    logger: (m) => {
+      if (m.status === "recognizing text") onProgress(0.35 + m.progress * 0.6, "Reading the card");
+      else if (m.status && m.status.indexOf("load") === 0) onProgress(0.1, "Loading the reader");
+    },
+  });
+  return worker;
+}
+
+async function runPass(canvas, psm) {
+  const w = await getWorker(() => {});
+  await w.setParameters({
+    tessedit_pageseg_mode: String(psm),
+    preserve_interword_spaces: "1",
+    user_defined_dpi: "300",
+  });
+  const res = await w.recognize(canvas, {}, { text: true, blocks: true });
+  return res.data;
+}
+
+function score(lines, f) {
+  let s = 0;
+  if (f.email) s += 30;
+  if (f.work || f.mobile) s += 25;
+  if (f.first && f.last) s += 20;
+  if (f.company) s += 10;
+  if (f.website) s += 8;
+  if (f.address) s += 7;
+  const mean = lines.length ? lines.reduce((a, l) => a + l.conf, 0) / lines.length : 0;
+  return s + mean * 0.4;
+}
+
+/* ============ vCard ============ */
+
+function splitAddress(a) {
+  const out = { street: a || "", city: "", state: "", zip: "" };
+  if (!a) return out;
+  const m = a.match(RE.cityStateZip);
+  if (m) {
+    out.city = m[1].replace(/^[,\s]+/, "").trim();
+    out.state = m[2].toUpperCase();
+    out.zip = m[3];
+    out.street = a.slice(0, m.index).replace(/[,\s]+$/, "").trim();
+  }
+  return out;
+}
+
+function vcard(f) {
+  const esc = (s) => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;")
+    .replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  const L = ["BEGIN:VCARD", "VERSION:3.0"];
+  L.push("N:" + esc(f.last) + ";" + esc(f.first) + ";" + esc(f.middle) + ";;");
+  const fn = [f.first, f.middle, f.last].filter(Boolean).join(" ").trim();
+  L.push("FN:" + esc(fn || f.company || "Scanned contact"));
+  if (f.company) L.push("ORG:" + esc(f.company));
+  if (f.title) L.push("TITLE:" + esc(f.title));
+  if (f.mobile) L.push("TEL;TYPE=CELL,VOICE:" + esc(f.mobile));
+  if (f.work) L.push("TEL;TYPE=WORK,VOICE:" + esc(f.work));
+  if (f.email) L.push("EMAIL;TYPE=INTERNET,WORK:" + esc(f.email));
+  if (f.website) {
+    const u = /^https?:/i.test(f.website) ? f.website : "https://" + f.website;
+    L.push("URL:" + esc(u));
+  }
+  if (f.address) {
+    const a = splitAddress(f.address);
+    L.push("ADR;TYPE=WORK:;;" + esc(a.street) + ";" + esc(a.city) + ";" + esc(a.state) + ";" + esc(a.zip) + ";");
+  }
+  if (f.notes) L.push("NOTE:" + esc(f.notes));
+  L.push("END:VCARD");
+  return L.join("\r\n");
+}
+
+/* ============ UI ============ */
+
+const SPEC = [
+  ["first", "First name", "given-name"],
+  ["middle", "Middle", "additional-name"],
+  ["last", "Last name", "family-name"],
+  ["company", "Company", "organization"],
+  ["title", "Title", "organization-title"],
+  ["mobile", "Mobile", "tel"],
+  ["work", "Work phone", "tel"],
+  ["email", "Email", "email"],
+  ["website", "Website", "url"],
+  ["address", "Address", "street-address"],
+  ["notes", "Notes", "off"],
+];
+
+const el = (id) => document.getElementById(id);
+const slot = el("slot"), fileIn = el("file"), preview = el("preview");
+const scanBtn = el("scan"), pickBtn = el("pick"), dock = el("dock");
+const fieldsBox = el("fields"), msgBox = el("msg"), rawBox = el("raw");
+
+let image = null;
+let crop = null;      // {x,y,w,h} in natural image pixels
+let viewScale = 1;
+
+function say(text, kind) {
+  msgBox.textContent = text;
+  msgBox.className = "msg on " + (kind || "");
+  if (!text) msgBox.className = "msg";
+}
+
+function setProgress(p, stage) {
+  el("progress").classList.add("on");
+  el("barfill").style.width = Math.round(p * 100) + "%";
+  el("stage").textContent = stage;
+}
+
+/* --- preview + crop --- */
+
+function drawPreview() {
+  if (!image) return;
+  const cssW = slot.clientWidth;
+  viewScale = cssW / image.width;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  preview.width = Math.round(cssW * dpr);
+  preview.height = Math.round(image.height * viewScale * dpr);
+  preview.style.height = Math.round(image.height * viewScale) + "px";
+  const ctx = preview.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, preview.height);
+  ctx.drawImage(image, 0, 0, cssW, image.height * viewScale);
+
+  ctx.fillStyle = "rgba(20,24,26,.55)";
+  const x = crop.x * viewScale, y = crop.y * viewScale;
+  const w = crop.w * viewScale, h = crop.h * viewScale;
+  const vh = image.height * viewScale;
+  ctx.fillRect(0, 0, cssW, y);
+  ctx.fillRect(0, y + h, cssW, vh - y - h);
+  ctx.fillRect(0, y, x, h);
+  ctx.fillRect(x + w, y, cssW - x - w, h);
+
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillStyle = "#fff";
+  const r = 11;
+  [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].forEach(([cx, cy]) => {
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = brandColor(); ctx.lineWidth = 2; ctx.stroke();
+  });
+}
+
+function brandColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--brand").trim() || "#B0261F";
+}
+
+let dragging = null;
+function pointAt(ev) {
+  const r = preview.getBoundingClientRect();
+  return { x: (ev.clientX - r.left) / viewScale, y: (ev.clientY - r.top) / viewScale };
+}
+preview.addEventListener("pointerdown", (ev) => {
+  if (!image) return;
+  const p = pointAt(ev);
+  const hit = 34 / viewScale;
+  const corners = {
+    tl: [crop.x, crop.y], tr: [crop.x + crop.w, crop.y],
+    bl: [crop.x, crop.y + crop.h], br: [crop.x + crop.w, crop.y + crop.h],
+  };
+  for (const k in corners) {
+    if (Math.hypot(p.x - corners[k][0], p.y - corners[k][1]) < hit) {
+      dragging = k;
+      preview.setPointerCapture(ev.pointerId);
+      ev.preventDefault();
       return;
     }
-    const vcard = buildVCard(c);
-    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const safe = (c.firstName + '_' + c.lastName).replace(/[^a-zA-Z0-9_\-]/g, '') || 'contact';
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${safe}.vcf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-    toast('Opening contact card…');
+  }
+});
+preview.addEventListener("pointermove", (ev) => {
+  if (!dragging || !image) return;
+  ev.preventDefault();
+  const p = pointAt(ev);
+  const px = Math.max(0, Math.min(image.width, p.x));
+  const py = Math.max(0, Math.min(image.height, p.y));
+  let l = crop.x, t = crop.y, r = crop.x + crop.w, b = crop.y + crop.h;
+  if (dragging === "tl") { l = px; t = py; }
+  if (dragging === "tr") { r = px; t = py; }
+  if (dragging === "bl") { l = px; b = py; }
+  if (dragging === "br") { r = px; b = py; }
+  const min = image.width * 0.15;
+  if (r - l < min || b - t < min) return;
+  crop = { x: l, y: t, w: r - l, h: b - t };
+  drawPreview();
+});
+["pointerup", "pointercancel"].forEach((e) =>
+  preview.addEventListener(e, () => { dragging = null; })
+);
+window.addEventListener("resize", () => { if (image) drawPreview(); });
+
+/* --- file intake --- */
+
+async function loadFile(file) {
+  say("");
+  try {
+    if (window.createImageBitmap) {
+      image = await createImageBitmap(file, { imageOrientation: "from-image" });
+    } else {
+      throw new Error("no bitmap");
+    }
+  } catch (e) {
+    image = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = () => rej(new Error("That image could not be opened. Try a JPEG or PNG."));
+      i.src = URL.createObjectURL(file);
+    });
+  }
+  const inset = 0.04;
+  crop = {
+    x: image.width * inset, y: image.height * inset,
+    w: image.width * (1 - inset * 2), h: image.height * (1 - inset * 2),
+  };
+  slot.classList.add("has-image");
+  el("cropnote").classList.add("on");
+  drawPreview();
+  scanBtn.disabled = false;
+  fieldsBox.classList.remove("on");
+  dock.classList.remove("on");
+  rawBox.classList.remove("on");
+}
+
+pickBtn.addEventListener("click", () => fileIn.click());
+slot.addEventListener("click", (e) => { if (!image) fileIn.click(); });
+slot.addEventListener("keydown", (e) => {
+  if ((e.key === "Enter" || e.key === " ") && !image) { e.preventDefault(); fileIn.click(); }
+});
+fileIn.addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (f) loadFile(f).catch((err) => say(err.message, "err"));
+  e.target.value = "";
+});
+
+/* --- scan --- */
+
+scanBtn.addEventListener("click", async () => {
+  if (!image) return;
+  scanBtn.disabled = true; pickBtn.disabled = true;
+  say("");
+  setProgress(0.05, "Preparing the image");
+  await new Promise((r) => setTimeout(r, 30));
+
+  try {
+    const v = variants(image, crop.x, crop.y, crop.w, crop.h);
+
+    setProgress(0.25, "Reading the card");
+    let data = await runPass(v.binary, 6);
+    let lines = collectLines(data);
+    let out = extractFields(lines);
+    let best = { lines, out, data, s: score(lines, out.fields) };
+
+    // Only pay for a second pass when the first one came back thin.
+    if (best.s < 78) {
+      setProgress(0.7, "Trying a second read");
+      const d2 = await runPass(v.grey, 3);
+      const l2 = collectLines(d2);
+      const o2 = extractFields(l2);
+      const s2 = score(l2, o2.fields);
+      if (s2 > best.s) best = { lines: l2, out: o2, data: d2, s: s2 };
+    }
+
+    setProgress(1, "Done");
+    render(best.out.fields, best.out.confidence, best.data.text || "");
+
+    const got = Object.keys(best.out.fields).filter((k) => k !== "notes" && best.out.fields[k]).length;
+    if (got === 0) {
+      say("Nothing readable came off that photo. Get closer, lay the card flat, and avoid glare or shadow across the text.", "err");
+    } else if (best.s < 60) {
+      say("Some of this is a guess. Check the flagged rows before saving.", "");
+      msgBox.className = "msg on err";
+    } else {
+      say("Read " + got + " field" + (got === 1 ? "" : "s") + ". Check them, then save.", "ok");
+    }
+  } catch (err) {
+    console.error(err);
+    say("The reader failed to run: " + (err && err.message ? err.message : err) + ". Check your connection and reload.", "err");
+  } finally {
+    setTimeout(() => el("progress").classList.remove("on"), 500);
+    scanBtn.disabled = false; pickBtn.disabled = false;
+  }
+});
+
+/* --- render fields --- */
+
+function render(f, conf, rawText) {
+  fieldsBox.innerHTML = "";
+  SPEC.forEach(([key, label, ac]) => {
+    const row = document.createElement("div");
+    row.className = "f" + (f[key] ? "" : " empty");
+
+    const lab = document.createElement("label");
+    lab.textContent = label;
+    lab.setAttribute("for", "in-" + key);
+
+    const val = document.createElement("div");
+    val.className = "val";
+
+    const input = document.createElement(key === "notes" || key === "address" ? "textarea" : "input");
+    input.id = "in-" + key;
+    input.value = f[key] || "";
+    input.setAttribute("autocomplete", ac);
+    input.setAttribute("autocapitalize", key === "email" || key === "website" ? "none" : "words");
+    input.setAttribute("autocorrect", "off");
+    if (key === "email") input.type = "email";
+    else if (key === "mobile" || key === "work") input.type = "tel";
+    input.placeholder = "—";
+    val.appendChild(input);
+
+    // The flag is the point of this screen: show what not to trust.
+    const c = conf[key === "first" || key === "middle" || key === "last" ? "name" : key];
+    if (f[key] && c != null && c < 76) {
+      const flag = document.createElement("span");
+      flag.className = "flag";
+      flag.textContent = "check";
+      flag.title = "Low reading confidence (" + Math.round(c) + "%)";
+      val.appendChild(flag);
+    }
+
+    row.appendChild(lab);
+    row.appendChild(val);
+    fieldsBox.appendChild(row);
   });
+
+  fieldsBox.classList.add("on");
+  dock.classList.add("on");
+  el("rawtext").textContent = rawText.trim() || "(nothing)";
+  rawBox.classList.add("on");
+  el("againrow").style.display = "flex";
+}
+
+function currentFields() {
+  const f = {};
+  SPEC.forEach(([k]) => {
+    const i = el("in-" + k);
+    f[k] = i ? i.value.trim() : "";
+  });
+  return f;
+}
+
+/* --- save + copy --- */
+
+el("save").addEventListener("click", async () => {
+  const f = currentFields();
+  if (!f.first && !f.last && !f.company) {
+    say("Add at least a name or a company before saving.", "err");
+    return;
+  }
+  const stored = addCard(f);
+  const text = vcard(f);
+  const name = ([f.first, f.last].filter(Boolean).join("-") || "contact").replace(/[^\w\-]/g, "");
+  const blob = new Blob([text], { type: "text/vcard;charset=utf-8" });
+  const file = new File([blob], name + ".vcf", { type: "text/vcard" });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      say(stored ? "Sent to Contacts and added to your scanned cards."
+                 : "Sent to Contacts. This device blocks local storage, so it was not added to the list.", "ok");
+      return;
+    } catch (e) {
+      if (e && e.name === "AbortError") return;
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name + ".vcf";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  say("Contact file downloaded. Open it to add to Contacts.", "ok");
+});
+
+/* ============ saved cards (on-device only) ============ */
+
+const STORE_KEY = "dirtdog.cards.v1";
+
+// Safari private mode and some in-app webviews throw on localStorage, so fall
+// back to memory rather than letting a save blow up the whole flow.
+const LS = (function () {
+  try {
+    localStorage.setItem("__t", "1");
+    localStorage.removeItem("__t");
+    return localStorage;
+  } catch (e) { return null; }
 })();
+let memCards = [];
+
+function loadCards() {
+  if (!LS) return memCards;
+  try { return JSON.parse(LS.getItem(STORE_KEY) || "[]"); } catch (e) { return []; }
+}
+function storeCards(list) {
+  memCards = list;
+  if (!LS) return false;
+  try { LS.setItem(STORE_KEY, JSON.stringify(list)); return true; }
+  catch (e) { return false; }
+}
+
+function addCard(f) {
+  const list = loadCards();
+  list.unshift(Object.assign({ id: Date.now() + "-" + Math.random().toString(36).slice(2, 7), ts: new Date().toISOString() }, f));
+  const ok = storeCards(list);
+  renderSaved();
+  return ok;
+}
+
+function renderSaved() {
+  const list = loadCards();
+  const wrap = el("savedwrap");
+  if (!list.length) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  const box = el("savedlist");
+  box.innerHTML = "";
+  list.forEach((c) => {
+    const row = document.createElement("div");
+    row.className = "sv";
+
+    const who = document.createElement("div");
+    who.className = "who";
+    const nm = document.createElement("div");
+    nm.className = "nm";
+    nm.textContent = [c.first, c.last].filter(Boolean).join(" ") || c.company || "Untitled card";
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const when = new Date(c.ts);
+    meta.textContent = [c.company && c.company !== nm.textContent ? c.company : c.title,
+      isNaN(when) ? "" : when.toLocaleDateString(undefined, { month: "short", day: "numeric" })]
+      .filter(Boolean).join(" · ");
+    who.appendChild(nm); who.appendChild(meta);
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.type = "button";
+    del.textContent = "\u00d7";
+    del.setAttribute("aria-label", "Remove " + nm.textContent);
+    del.addEventListener("click", () => {
+      storeCards(loadCards().filter((x) => x.id !== c.id));
+      renderSaved();
+    });
+
+    row.appendChild(who); row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+
+/* ---- CSV for CRM import ---- */
+
+const CSV_COLS = [
+  ["ts", "Scanned"], ["first", "First"], ["middle", "Middle"], ["last", "Last"],
+  ["company", "Company"], ["title", "Title"], ["mobile", "Mobile"], ["work", "Work Phone"],
+  ["email", "Email"], ["website", "Website"], ["address", "Address"], ["notes", "Notes"],
+];
+
+function csvCell(v) {
+  let t = v == null ? "" : String(v);
+  // A leading =, +, - or @ is executed as a formula by Excel and Sheets on open.
+  // Phone numbers legitimately start with + and must import into the CRM clean,
+  // so they are exempt from the guard.
+  const phoneish = /^\+?[\d\s().\-]{7,}$/.test(t);
+  if (!phoneish && /^[=+\-@\t\r]/.test(t)) t = "'" + t;
+  return '"' + t.replace(/"/g, '""') + '"';
+}
+
+function buildCsv(list) {
+  const rows = [CSV_COLS.map((c) => csvCell(c[1])).join(",")];
+  list.forEach((c) => {
+    rows.push(CSV_COLS.map(([k]) => {
+      if (k === "ts") { const d = new Date(c.ts); return csvCell(isNaN(d) ? c.ts : d.toISOString().slice(0, 10)); }
+      return csvCell(c[k]);
+    }).join(","));
+  });
+  return "\uFEFF" + rows.join("\r\n") + "\r\n";   // BOM so Excel reads UTF-8
+}
+
+el("csv").addEventListener("click", () => {
+  const list = loadCards();
+  if (!list.length) { say("No scanned cards to export yet.", "err"); return; }
+  const blob = new Blob([buildCsv(list)], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "dirtdog-cards-" + new Date().toISOString().slice(0, 10) + ".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  say("Exported " + list.length + " card" + (list.length === 1 ? "" : "s") + " as CSV.", "ok");
+});
+
+el("clearall").addEventListener("click", () => {
+  const n = loadCards().length;
+  if (!n) return;
+  if (!window.confirm("Remove all " + n + " scanned card" + (n === 1 ? "" : "s") + " from this phone? Contacts you already saved are not affected.")) return;
+  storeCards([]);
+  renderSaved();
+  say("Scanned cards cleared.", "ok");
+});
+
+renderSaved();
+
+el("again").addEventListener("click", () => {
+  image = null; crop = null;
+  slot.classList.remove("has-image");
+  el("cropnote").classList.remove("on");
+  fieldsBox.classList.remove("on");
+  fieldsBox.innerHTML = "";
+  dock.classList.remove("on");
+  rawBox.classList.remove("on");
+  el("againrow").style.display = "none";
+  scanBtn.disabled = true;
+  say("");
+  window.scrollTo({ top: 0, behavior: "instant" });
+  fileIn.click();
+});
+
+el("copy").addEventListener("click", async () => {
+  const f = currentFields();
+  const txt = SPEC.map(([k, label]) => (f[k] ? label + ": " + f[k] : null))
+    .filter(Boolean).join("\n");
+  try {
+    await navigator.clipboard.writeText(txt);
+    say("Details copied.", "ok");
+  } catch (e) {
+    say("Copy is blocked here. Select the text by hand instead.", "err");
+  }
+});
 </script>
 </body>
 </html>
