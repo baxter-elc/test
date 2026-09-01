@@ -90,15 +90,17 @@
   .cropnote.on{display:block}
 
   .row{display:flex;gap:10px;margin-top:12px}
-  button{
+  button,.btn{
     font-family:inherit;font-size:16px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+    text-align:center;text-decoration:none;
     border-radius:8px;border:1px solid var(--rule);
     background:var(--surface);color:var(--ink);
     padding:12px 16px;cursor:pointer;flex:1;
   }
-  button:focus-visible{outline:2.5px solid var(--brand);outline-offset:2px}
-  button:disabled{opacity:.45;cursor:default}
-  button.go{background:var(--brand);border-color:var(--brand);color:#fff}
+  button:focus-visible,.btn:focus-visible{outline:2.5px solid var(--brand);outline-offset:2px}
+  button:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:default}
+  button.go,.btn.go{background:var(--brand);border-color:var(--brand);color:#fff}
 
   /* ---- progress ---- */
   .progress{display:none;margin-top:16px}
@@ -172,7 +174,7 @@
   }
   .dock.on{display:block}
   .dock .inner{max-width:560px;margin:0 auto;display:flex;gap:10px}
-  .dock button{padding:15px 16px;font-size:17px}
+  .dock button,.dock .btn{padding:15px 16px;font-size:17px}
 
   @media (prefers-color-scheme:dark){
     :root{
@@ -181,7 +183,7 @@
       --flag:#E0A54A; --flag-dim:#33290F; --stop:#F0917A;
       --tint:#1E2320; --stop-dim:#33201B; --dock:rgba(15,18,17,.94);
     }
-    button.go{color:#1A0C0A}
+    button.go,.btn.go{color:#1A0C0A}
     .f.empty label{color:#6E7872}
   }
 
@@ -232,9 +234,13 @@
     <h2 class="sechead">Scanned cards</h2>
     <div class="saved" id="savedlist"></div>
     <div class="row">
-      <button id="clearall">Clear all</button>
-      <button id="csv" class="go">Export all as CSV</button>
+      <a id="vcfall" class="btn go" href="contacts.vcf">Add all to Contacts</a>
     </div>
+    <div class="row">
+      <button id="clearall">Clear all</button>
+      <button id="csv">Export all as CSV</button>
+    </div>
+    <p class="hint">Opens every card above in one pass. On the iOS sheet, scroll down to Create New Contact.</p>
   </div>
 
   <p class="hint">On iPhone: tap Share, then Add to Home Screen, to run this like an app.</p>
@@ -243,7 +249,7 @@
 <div class="dock" id="dock">
   <div class="inner">
     <button id="copy">Copy details</button>
-    <button id="save" class="go">Add to Contacts</button>
+    <a id="save" class="btn go" href="contact.vcf">Add to Contacts</a>
   </div>
 </div>
 
@@ -983,6 +989,11 @@ function render(f, conf, rawText) {
 
   fieldsBox.classList.add("on");
   dock.classList.add("on");
+  fieldsBox.addEventListener("input", () => {
+    clearTimeout(render._t);
+    render._t = setTimeout(stageCurrent, 250);
+  });
+  stageCurrent();
   el("rawtext").textContent = rawText.trim() || "(nothing)";
   rawBox.classList.add("on");
   el("againrow").style.display = "flex";
@@ -998,38 +1009,6 @@ function currentFields() {
 }
 
 /* --- save + copy --- */
-
-el("save").addEventListener("click", async () => {
-  const f = currentFields();
-  if (!f.first && !f.last && !f.company) {
-    say("Add at least a name or a company before saving.", "err");
-    return;
-  }
-  const stored = addCard(f);
-  const text = vcard(f);
-  const name = ([f.first, f.last].filter(Boolean).join("-") || "contact").replace(/[^\w\-]/g, "");
-  const blob = new Blob([text], { type: "text/vcard;charset=utf-8" });
-  const file = new File([blob], name + ".vcf", { type: "text/vcard" });
-
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file] });
-      say(stored ? "Sent to Contacts and added to your scanned cards."
-                 : "Sent to Contacts. This device blocks local storage, so it was not added to the list.", "ok");
-      return;
-    } catch (e) {
-      if (e && e.name === "AbortError") return;
-    }
-  }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = name + ".vcf";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-  say("Contact file downloaded. Open it to add to Contacts.", "ok");
-});
 
 /* ============ saved cards (on-device only) ============ */
 
@@ -1070,6 +1049,7 @@ function renderSaved() {
   const wrap = el("savedwrap");
   if (!list.length) { wrap.style.display = "none"; return; }
   wrap.style.display = "block";
+  stageBatch();
   const box = el("savedlist");
   box.innerHTML = "";
   list.forEach((c) => {
@@ -1086,7 +1066,7 @@ function renderSaved() {
     const when = new Date(c.ts);
     meta.textContent = [c.company && c.company !== nm.textContent ? c.company : c.title,
       isNaN(when) ? "" : when.toLocaleDateString(undefined, { month: "short", day: "numeric" })]
-      .filter(Boolean).join(" · ");
+      .filter(Boolean).join(" \u00b7 ");
     who.appendChild(nm); who.appendChild(meta);
 
     const del = document.createElement("button");
@@ -1102,6 +1082,23 @@ function renderSaved() {
     row.appendChild(who); row.appendChild(del);
     box.appendChild(row);
   });
+}
+
+/* ---- multi-contact vCard: one file, imported in a single pass ---- */
+
+function vcardMulti(list) {
+  return list.map(vcard).join("\r\n") + "\r\n";
+}
+
+// Fallback for browsers with no service worker.
+function openVcf(text, filename) {
+  const blob = new Blob([text], { type: "text/vcard" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 /* ---- CSV for CRM import ---- */
@@ -1155,8 +1152,6 @@ el("clearall").addEventListener("click", () => {
   say("Scanned cards cleared.", "ok");
 });
 
-renderSaved();
-
 el("again").addEventListener("click", () => {
   image = null; crop = null;
   slot.classList.remove("has-image");
@@ -1170,6 +1165,81 @@ el("again").addEventListener("click", () => {
   say("");
   window.scrollTo({ top: 0, behavior: "instant" });
   fileIn.click();
+});
+
+/* ============ vCard handoff ============ */
+/* iOS shows the Create New Contact sheet only for a real navigation to a
+   text/vcard response. The worker manufactures that response; the page just
+   keeps the payload staged so the plain <a href> is always ready to tap. */
+
+const VCF_CACHE = "vcf-handoff";
+let swReady = false;
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then(() => {
+    swReady = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { swReady = true; });
+    if (!navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready.then(() => { swReady = true; });
+    }
+  }).catch(() => { swReady = false; });
+}
+
+async function stage(key, text) {
+  try {
+    const cache = await caches.open(VCF_CACHE);
+    await cache.put(key, new Response(text, { headers: { "Content-Type": "text/vcard" } }));
+    return true;
+  } catch (e) { return false; }
+}
+
+function stageCurrent() {
+  const f = currentFields();
+  if (!f.first && !f.last && !f.company) return;
+  stage("vcf-payload-single", vcard(f));
+}
+
+function stageBatch() {
+  const list = loadCards();
+  if (list.length) stage("vcf-payload-batch", vcardMulti(list));
+}
+
+// Legacy path for browsers with no service worker (or a failed registration).
+function legacySave(f) {
+  const text = vcard(f);
+  const name = ([f.first, f.last].filter(Boolean).join("-") || "contact").replace(/[^\w\-]/g, "");
+  const file = new File([text], name + ".vcf", { type: "text/vcard" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({ files: [file] }).catch(() => openVcf(text, name + ".vcf"));
+  } else {
+    openVcf(text, name + ".vcf");
+  }
+}
+
+el("save").addEventListener("click", (ev) => {
+  const f = currentFields();
+  if (!f.first && !f.last && !f.company) {
+    ev.preventDefault();
+    say("Add at least a name or a company before saving.", "err");
+    return;
+  }
+  addCard(f);                      // synchronous, so it lands before we navigate
+  if (!swReady) {
+    ev.preventDefault();
+    legacySave(f);
+    say("Saved to your scanned cards. Open the file, then Share \u2192 Add to Contacts.", "ok");
+  }
+  // With the worker live, the anchor navigates on its own and iOS takes over.
+});
+
+el("vcfall").addEventListener("click", (ev) => {
+  const list = loadCards();
+  if (!list.length) { ev.preventDefault(); say("No scanned cards to export yet.", "err"); return; }
+  if (!swReady) {
+    ev.preventDefault();
+    openVcf(vcardMulti(list), "contacts.vcf");
+    say("Downloaded " + list.length + " contacts. Open the file, then Add All Contacts.", "ok");
+  }
 });
 
 el("copy").addEventListener("click", async () => {
@@ -1186,3 +1256,5 @@ el("copy").addEventListener("click", async () => {
 </script>
 </body>
 </html>
+
+renderSaved();
